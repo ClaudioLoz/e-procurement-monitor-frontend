@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'src/utils/axios';
+import axios from 'axios';
 
 import { Helmet } from 'react-helmet-async';
 import PageHeader from './PageHeader';
@@ -11,14 +11,13 @@ import Results from './Results';
 
 function ManagementMonitoredProcurement() {
   const isMountedRef = useRefMounted();
-  const [invoices, setInvoices] = useState([]);
+  const [eprocurements, setEProcurements] = useState([]);
 
-  const getInvoices = useCallback(async () => {
+  const getEprocurements = useCallback(async () => {
     try {
-      const response = await axios.get('/api/invoices');
-
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements`);
       if (isMountedRef.current) {
-        setInvoices(response.data.invoices);
+        setEProcurements(response.data);
       }
     } catch (err) {
       console.error(err);
@@ -26,8 +25,8 @@ function ManagementMonitoredProcurement() {
   }, [isMountedRef]);
 
   useEffect(() => {
-    getInvoices();
-  }, [getInvoices]);
+    getEprocurements();
+  }, [getEprocurements]);
 
   return (
     <>
@@ -49,7 +48,7 @@ function ManagementMonitoredProcurement() {
         spacing={4}
       >
         <Grid item xs={12}>
-          <Results invoices={invoices} />
+          <Results eprocurements={eprocurements} />
         </Grid>
       </Grid>
     </>

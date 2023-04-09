@@ -1,11 +1,8 @@
 {
-  "name": "tokyo-react-admin-dashboard-js",
-  "version": "3.1.0",
-  "title": "Tokyo React Javascript Admin Dashboard",
-  "description": "High performance React template built with lots of powerful MUI (Material-UI) components across multiple product niches for fast & perfect apps development processes.",
+  "name": "e-procurement-monitor-frontend",
+  "title": "E-Procurement monitor",
   "author": {
-    "name": "BloomUI.com",
-    "url": "https://bloomui.com"
+    "name": "Claudio Lozano"
   },
   "private": true,
   "dependencies": {

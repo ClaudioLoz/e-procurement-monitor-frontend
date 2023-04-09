@@ -2,7 +2,7 @@ import { useState, forwardRef } from 'react';
 
 import PropTypes from 'prop-types';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-import numeral from 'numeral';
+// import numeral from 'numeral';
 
 import {
   Avatar,
@@ -36,7 +36,7 @@ import BulkActions from './BulkActions';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import { useSnackbar } from 'notistack';
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
 
 const DialogWrapper = styled(Dialog)(
   () => `
@@ -76,20 +76,16 @@ const Transition = forwardRef(function Transition(props, ref) {
 
 const getInvoiceStatusLabel = (invoiceStatus) => {
   const map = {
-    pending: {
-      text: 'Pending Payment',
+    WORK: {
+      text: 'OBRA',
       color: 'warning'
     },
-    completed: {
-      text: 'Completed',
-      color: 'success'
-    },
-    draft: {
-      text: 'Draft',
+    GOOD: {
+      text: 'BIEN',
       color: 'info'
     },
-    progress: {
-      text: 'In progress',
+    SERVICE: {
+      text: 'SERVICIO',
       color: 'primary'
     }
   };
@@ -103,8 +99,8 @@ const getInvoiceStatusLabel = (invoiceStatus) => {
   );
 };
 
-const applyFilters = (invoices, query, filters) => {
-  return invoices.filter((invoice) => {
+const applyFilters = (eprocurements, query, filters) => {
+  return eprocurements.filter((eprocurement) => {
     let matches = true;
 
     if (query) {
@@ -112,12 +108,12 @@ const applyFilters = (invoices, query, filters) => {
       let containsQuery = false;
 
       properties.forEach((property) => {
-        if (invoice[property].toLowerCase().includes(query.toLowerCase())) {
+        if (eprocurement[property].toLowerCase().includes(query.toLowerCase())) {
           containsQuery = true;
         }
       });
 
-      if (filters.status && invoice.status !== filters.status) {
+      if (filters.status && eprocurement.status !== filters.status) {
         matches = false;
       }
 
@@ -129,7 +125,7 @@ const applyFilters = (invoices, query, filters) => {
     Object.keys(filters).forEach((key) => {
       const value = filters[key];
 
-      if (value && invoice[key] !== value) {
+      if (value && eprocurement[key] !== value) {
         matches = false;
       }
     });
@@ -138,11 +134,11 @@ const applyFilters = (invoices, query, filters) => {
   });
 };
 
-const applyPagination = (invoices, page, limit) => {
-  return invoices.slice(page * limit, page * limit + limit);
+const applyPagination = (eprocurements, page, limit) => {
+  return eprocurements.slice(page * limit, page * limit + limit);
 };
 
-const Results = ({ invoices }) => {
+const Results = ({ eprocurements }) => {
   const [selectedItems, setSelectedInvoices] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
@@ -162,7 +158,7 @@ const Results = ({ invoices }) => {
 
   const handleSelectAllInvoices = (event) => {
     setSelectedInvoices(
-      event.target.checked ? invoices.map((invoice) => invoice.id) : []
+      event.target.checked ? eprocurements.map((eprocurement) => eprocurement.id) : []
     );
   };
 
@@ -184,12 +180,12 @@ const Results = ({ invoices }) => {
     setLimit(parseInt(event.target.value));
   };
 
-  const filteredInvoices = applyFilters(invoices, query, filters);
-  const paginatedInvoices = applyPagination(filteredInvoices, page, limit);
+  const filteredEProcurements = applyFilters(eprocurements, query, filters);
+  const paginatedEProcurements = applyPagination(filteredEProcurements, page, limit);
   const selectedBulkActions = selectedItems.length > 0;
   const selectedSomeInvoices =
-    selectedItems.length > 0 && selectedItems.length < invoices.length;
-  const selectedAllInvoices = selectedItems.length === invoices.length;
+    selectedItems.length > 0 && selectedItems.length < eprocurements.length;
+  const selectedAllInvoices = selectedItems.length === eprocurements.length;
 
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
@@ -269,7 +265,7 @@ const Results = ({ invoices }) => {
               <Box/>
               <TablePagination
                 component="div"
-                count={filteredInvoices.length}
+                count={filteredEProcurements.length}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleLimitChange}
                 page={page}
@@ -281,7 +277,8 @@ const Results = ({ invoices }) => {
         </Box>
         <Divider />
 
-        {paginatedInvoices.length === 0 ? (
+          {console.log(paginatedEProcurements)}
+        {paginatedEProcurements.length === 0 ? (
           <Typography
             sx={{
               py: 10
@@ -301,7 +298,7 @@ const Results = ({ invoices }) => {
                   <TableRow>
                     <TableCell>Entidad contratante</TableCell>
                     <TableCell>Contratista</TableCell>
-                    <TableCell align="center">Objeto de contratación</TableCell>
+                    <TableCell >Objeto de contratación</TableCell>
                     <TableCell>Monto</TableCell>
                     <TableCell>Fecha de inicio</TableCell>
                     <TableCell>Fecha de fin</TableCell>
@@ -310,14 +307,14 @@ const Results = ({ invoices }) => {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedInvoices.map((invoice) => {
+                  {paginatedEProcurements.map((eprocurement) => {
                     const isInvoiceSelected = selectedItems.includes(
-                      invoice.id
+                      eprocurement.id
                     );
                     return (
                       <TableRow
                         hover
-                        key={invoice.id}
+                        key={eprocurement.id}
                         selected={isInvoiceSelected}
                       >
                         <TableCell>
@@ -325,36 +322,51 @@ const Results = ({ invoices }) => {
                             <Checkbox
                               checked={isInvoiceSelected}
                               onChange={(event) =>
-                                handleSelectOneInvoice(event, invoice.id)
+                                handleSelectOneInvoice(event, eprocurement.id)
                               }
                               value={isInvoiceSelected}
                             />
                             <Box pl={1}>
                               <Typography noWrap variant="subtitle2">
-                                {invoice.number}
+                                {eprocurement.contractingEntityName + " - " + eprocurement.contractingEntityRuc}
                               </Typography>
                             </Box>
                           </Box>
                         </TableCell>
                         <TableCell>
+                              <Typography noWrap variant="subtitle2">
+                                {eprocurement.contractorName + " - " + eprocurement.contractorRuc}
+                            </Typography>
+                        </TableCell>
+                        <TableCell>
                           <Typography noWrap>
-                            {format(invoice.issuedDate, 'MMMM dd yyyy')}
+                            {getInvoiceStatusLabel(eprocurement.procurementObject)}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {/* {numeral(eprocurement.amount).format(
+                            `${eprocurement.currency}0,0.00`
+                          )} */}
+                          <Typography noWrap>
+                               S/. {eprocurement.amount}
+                            </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography noWrap>
+                            {/* {format(eprocurement.issuedDate, 'MMMM dd yyyy')} */}
+                            {eprocurement.contractStartDate[2]}/{eprocurement.contractStartDate[1]}/{eprocurement.contractStartDate[0]}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography noWrap>
+                            {/* {format(eprocurement.issuedDate, 'MMMM dd yyyy')} */}
+                            {eprocurement.contractEndDate[2]}/{eprocurement.contractEndDate[1]}/{eprocurement.contractEndDate[0]}
                           </Typography>
                         </TableCell>
                         <TableCell>
                             <Typography variant="h5">
-                              {invoice.clientName}
+                              {eprocurement.department}
                             </Typography>
-                        </TableCell>
-                        <TableCell>
-                          {numeral(invoice.amount).format(
-                            `${invoice.currency}0,0.00`
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          <Typography noWrap>
-                            {getInvoiceStatusLabel(invoice.status)}
-                          </Typography>
                         </TableCell>
                         <TableCell align="center">
                           <Typography noWrap>
@@ -364,7 +376,7 @@ const Results = ({ invoices }) => {
                                 to={
                                   `/${
                                     location.pathname.split('/')[1]
-                                  }/detalle/` + invoice.id
+                                  }/detalle/` + eprocurement.id
                                 }
                                 color="primary"
                               >
@@ -390,7 +402,7 @@ const Results = ({ invoices }) => {
             <Box p={2}>
               <TablePagination
                 component="div"
-                count={filteredInvoices.length}
+                count={filteredEProcurements.length}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleLimitChange}
                 page={page}
@@ -461,11 +473,11 @@ const Results = ({ invoices }) => {
 };
 
 Results.propTypes = {
-  invoices: PropTypes.array.isRequired
+  eprocurements: PropTypes.array.isRequired
 };
 
 Results.defaultProps = {
-  invoices: []
+  eprocurements: []
 };
 
 export default Results;
