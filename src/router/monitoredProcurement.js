@@ -35,11 +35,11 @@ const monitoredProcurementRoutes = [
             element: <Navigate to="1" replace />
           },
           {
-            path: ':invoiceId',
+            path: ':eProcurementId',
             element: <SingleInvoice />
           }
         ]
   }
-  ];
+];
 
 export default monitoredProcurementRoutes;

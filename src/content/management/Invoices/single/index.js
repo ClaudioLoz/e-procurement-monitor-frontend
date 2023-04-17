@@ -6,37 +6,34 @@ import PageTitleWrapper from 'src/components/PageTitleWrapper';
 import { Grid } from '@mui/material';
 import { useParams } from 'react-router-dom';
 import useRefMounted from 'src/hooks/useRefMounted';
-import axios from 'src/utils/axios';
+import axios from 'axios';
 
-import InvoiceBody from './InvoiceBody';
+import EProcurementBody from './EProcurementBody';
 import PageHeader from './PageHeader';
 
 function ManagementInvoicesView() {
   const isMountedRef = useRefMounted();
-  const [invoice, setInvoice] = useState(null);
+  const [eProcurement, setEProcurement] = useState(null);
 
-  const { invoiceId } = useParams();
+  const { eProcurementId } = useParams();
 
-  const getInvoice = useCallback(async () => {
+  const getEProcurement = useCallback(async () => {
     try {
-      const response = await axios.get('/api/invoice', {
-        params: {
-          invoiceId
-        }
-      });
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements/${eProcurementId}`);
+      console.log(response)
       if (isMountedRef.current) {
-        setInvoice(response.data.invoice);
+        setEProcurement(response.data);
       }
     } catch (err) {
       console.error(err);
     }
-  }, [invoiceId, isMountedRef]);
+  }, [eProcurementId, isMountedRef]);
 
   useEffect(() => {
-    getInvoice();
-  }, [getInvoice]);
+    getEProcurement();
+  }, [getEProcurement]);
   
-  if (!invoice) {
+  if (!eProcurement) {
     return null;
   }
 
@@ -46,7 +43,7 @@ function ManagementInvoicesView() {
         <title>Detalle de la contratación en seguimiento</title>
       </Helmet>
       <PageTitleWrapper>
-        <PageHeader invoice={invoice} />
+        <PageHeader/>
       </PageTitleWrapper>
 
       <Grid
@@ -60,7 +57,7 @@ function ManagementInvoicesView() {
         spacing={4}
       >
         <Grid item xs={12}>
-          <InvoiceBody invoice={invoice} />
+          <EProcurementBody eProcurement={eProcurement} />
         </Grid>
       </Grid>
     </>

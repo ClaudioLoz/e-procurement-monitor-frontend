@@ -2,7 +2,7 @@ import { useState, forwardRef } from 'react';
 
 import PropTypes from 'prop-types';
 import { Link as RouterLink, useLocation } from 'react-router-dom';
-// import numeral from 'numeral';
+import numeral from 'numeral';
 
 import {
   Avatar,
@@ -254,7 +254,7 @@ const Results = ({ eprocurements }) => {
               <BulkActions />
             </Box>
           )}
-          {!selectedBulkActions && (
+          {/* {!selectedBulkActions && (
             <Box
               flex={1}
               p={2}
@@ -265,6 +265,7 @@ const Results = ({ eprocurements }) => {
               <Box/>
               <TablePagination
                 component="div"
+                labelRowsPerPage={"Filas por página:"}
                 count={filteredEProcurements.length}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleLimitChange}
@@ -273,11 +274,10 @@ const Results = ({ eprocurements }) => {
                 rowsPerPageOptions={[5, 10, 15]}
               />
             </Box>
-          )}
+          )} */}
         </Box>
         <Divider />
 
-          {console.log(paginatedEProcurements)}
         {paginatedEProcurements.length === 0 ? (
           <Typography
             sx={{
@@ -344,11 +344,8 @@ const Results = ({ eprocurements }) => {
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          {/* {numeral(eprocurement.amount).format(
-                            `${eprocurement.currency}0,0.00`
-                          )} */}
                           <Typography noWrap>
-                               S/. {eprocurement.amount}
+                               S/. {numeral(eprocurement.amount).format('0,0')}
                             </Typography>
                         </TableCell>
                         <TableCell>
@@ -376,7 +373,7 @@ const Results = ({ eprocurements }) => {
                                 to={
                                   `/${
                                     location.pathname.split('/')[1]
-                                  }/detalle/` + eprocurement.id
+                                  }/detalle/${eprocurement.id}` 
                                 }
                                 color="primary"
                               >
@@ -402,6 +399,7 @@ const Results = ({ eprocurements }) => {
             <Box p={2}>
               <TablePagination
                 component="div"
+                labelRowsPerPage={"Filas por página:"}
                 count={filteredEProcurements.length}
                 onPageChange={handlePageChange}
                 onRowsPerPageChange={handleLimitChange}

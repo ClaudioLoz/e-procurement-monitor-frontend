@@ -22,6 +22,8 @@ import {
 } from '@mui/material';
 // import useAuth from 'src/hooks/useAuth';
 import DownloadTwoToneIcon from '@mui/icons-material/DownloadTwoTone';
+import numeral from 'numeral';
+// import axios from 'axios';
 
 import ReviewsTab from './ReviewsTab';
 import AdditionalInfoTab from './AdditionalInfoTab';
@@ -44,29 +46,14 @@ const TableWrapper = styled(Box)(
 `
 );
 
+const typographySx = {
+  whiteSpace: 'nowrap',
+  mb: 2
+};
 
-const InvoiceBody = ({ invoice }) => {
-  console.log(invoice);
+
+const EProcurementBody = ({ eProcurement }) => {
   // const { user } = useAuth();
-
-  const itemsList = [
-    {
-      id: 1,
-      name: 'Design services for March',
-      quantity: 1,
-      price: 8945,
-      currency: '$'
-    },
-    {
-      id: 2,
-      name: 'Website migration services',
-      quantity: 3,
-      price: 2367,
-      currency: '$'
-    }
-  ];
-
-  const [items] = useState(itemsList);
 
   const [currentTab, setCurrentTab] = useState('reviews');
 
@@ -91,33 +78,35 @@ const InvoiceBody = ({ invoice }) => {
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Box>
-            <Typography variant="h4" gutterBottom>
-              Entidad contratante:
+          <Box >
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Entidad contratante: {`${eProcurement.eprocurement.contractingEntityName} - ${eProcurement.eprocurement.contractingEntityRuc}`}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Contratista:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Contratista: {`${eProcurement.eprocurement.contractorName} - ${eProcurement.eprocurement.contractorRuc}`}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Objeto de contratación:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Objeto de contratación: {eProcurement.eprocurement.procurementObject}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Monto:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Monto:  S/. {numeral(eProcurement.eprocurement.amount).format('0,0')}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Departamento:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Departamento: {eProcurement.eprocurement.department}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Provincia:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Provincia: {eProcurement.eprocurement.province}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Distrito:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Distrito: {eProcurement.eprocurement.district}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Fecha de inicio del contrato:
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Fecha de inicio del contrato: {eProcurement.eprocurement.contractStartDate[2]}/
+              {eProcurement.eprocurement.contractStartDate[1]}/{eProcurement.eprocurement.contractStartDate[0]}
             </Typography>
-            <Typography variant="h4" gutterBottom>
-              Fecha fin del contrato:  
+            <Typography variant="h4" gutterBottom sx={typographySx}>
+              Fecha fin del contrato:  {eProcurement.eprocurement.contractEndDate[2]}/
+              {eProcurement.eprocurement.contractEndDate[1]}/{eProcurement.eprocurement.contractEndDate[0]}
             </Typography>
           </Box>
      
@@ -143,19 +132,20 @@ const InvoiceBody = ({ invoice }) => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {items.map((item) => (
-                          <TableRow key={item.id}>
+                        {eProcurement.fileInfoOutDTOList.map((item, index) => (
+                          <TableRow key={index}>
                             <TableCell>
                               <Typography noWrap>{item.name}</Typography>
                             </TableCell>
                             <TableCell>
                                   <Typography noWrap>
                                           <Button
-                                            disabled
+                                            
                                             variant="contained"
                                             sx={{
                                               mx: 3
                                             }}
+                                            onClick={async() =>  window.open(item.url, "_blank")}
                                             startIcon={<DownloadTwoToneIcon />}
                                           />
                                 </Typography>
@@ -190,17 +180,17 @@ const InvoiceBody = ({ invoice }) => {
             </Tabs>
           </TabsContainerWrapper>
           <Divider />
-          {currentTab === 'reviews' && <ReviewsTab />}
-          {currentTab === 'additional_info' && <AdditionalInfoTab />}
-          <BottomBarContent/>
+          {currentTab === 'reviews' && <ReviewsTab eProcurementId={eProcurement.eprocurement.id}/>}
+          {currentTab === 'additional_info' && <AdditionalInfoTab description={eProcurement.eprocurement.description}/>}
+          <BottomBarContent eProcurementId={eProcurement.eprocurement.id}/>
         </Card>
       </Grid>
     </Container>
   );
 };
 
-InvoiceBody.propTypes = {
-  invoice: PropTypes.object.isRequired
+EProcurementBody.propTypes = {
+  eProcurement: PropTypes.object.isRequired
 };
 
-export default InvoiceBody;
+export default EProcurementBody;

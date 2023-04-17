@@ -11,13 +11,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 
 import ArrowBackTwoToneIcon from '@mui/icons-material/ArrowBackTwoTone';
 import StarIcon from '@mui/icons-material/Star';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 
-const PageHeader = ({ invoice }) => {
+const PageHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(invoice)
   const handleBack = () => {
     return navigate(`/${location.pathname.split('/')[1]}/lista`);
   };
@@ -68,8 +67,8 @@ const PageHeader = ({ invoice }) => {
   );
 };
 
-PageHeader.propTypes = {
-  invoice: PropTypes.object.isRequired
-};
+// PageHeader.propTypes = {
+//   eProcurement: PropTypes.object.isRequired
+// };
 
 export default PageHeader;

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import { useTranslation } from 'react-i18next';
-import wait from 'src/utils/wait';
+import axios from 'axios';
 
 import {
   styled,
@@ -34,17 +34,6 @@ import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 import CloseTwoToneIcon from '@mui/icons-material/CloseTwoTone';
 import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
-// const IconButtonError = styled(IconButton)(
-//   ({ theme }) => `
-//      background: ${theme.colors.error.lighter};
-//      color: ${theme.colors.error.main};
-//      padding: ${theme.spacing(0.5)};
-
-//      &:hover {
-//       background: ${lighten(theme.colors.error.lighter, 0.4)};
-//      }
-// `
-// );
 
 const BoxUploadWrapper = styled(Box)(
   ({ theme }) => `
@@ -94,9 +83,19 @@ const AvatarDanger = styled(Avatar)(
 function PageHeader() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [selectedProcurementObject, setSelectedProcurementObject] = useState(null);
+  const [formData, setFormData] = useState(new FormData());
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
-  
+
+  const onDrop = (acceptedFiles) => {
+    const auxFormData = new FormData();
+    acceptedFiles.forEach((file) => {
+      auxFormData.append("files", file);
+    });
+    setFormData(auxFormData);
+  }
+
   const {
     acceptedFiles,
     isDragActive,
@@ -105,10 +104,7 @@ function PageHeader() {
     getRootProps,
     getInputProps
   } = useDropzone({
-    accept: {
-      'image/png': ['.png'],
-      'image/jpeg': ['.jpg']
-    }
+    onDrop
   });
 
   const files = acceptedFiles.map((file, index) => (
@@ -120,53 +116,14 @@ function PageHeader() {
   ));
 
   const contractObjects = [
-    { title: 'BIEN' },
-    { title: 'OBRA' },
-    { title: 'SERVICIO' }
+    { title: 'BIEN', translation:'GOOD' },
+    { title: 'OBRA', translation:'WORK' },
+    { title: 'SERVICIO', translation:'SERVICE' }
   ];
-  // const itemsList = [
-  //   {
-  //     id: 1,
-  //     name: 'Design services for March',
-  //     quantity: 1,
-  //     price: 8945,
-  //     currency: '$'
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Website migration services',
-  //     quantity: 3,
-  //     price: 2367,
-  //     currency: '$'
-  //   }
-  // ];
+  
+  const [contractStartDate, setContractStartDate] = useState(null);
+  const [contractEndDate, setContractEndDate] = useState(null);
 
-  //   {
-  //     avatar: '/static/images/avatars/1.jpg',
-  //     name: 'Maren Lipshutz'
-  //   },
-  //   {
-  //     avatar: '/static/images/avatars/2.jpg',
-  //     name: 'Zain Vetrovs'
-  //   },
-  //   {
-  //     avatar: '/static/images/avatars/3.jpg',
-  //     name: 'Hanna Siphron'
-  //   },
-  //   {
-  //     avatar: '/static/images/avatars/4.jpg',
-  //     name: 'Cristofer Aminoff'
-  //   },
-  //   {
-  //     avatar: '/static/images/avatars/5.jpg',
-  //     name: 'Maria Calzoni'
-  //   }
-  // ];
-
-  const [value, setValue] = useState(null);
-  const [value1, setValue1] = useState(null);
-
-  // const [items] = useState(itemsList);
 
   const handleCreateInvoiceOpen = () => {
     setOpen(true);
@@ -177,7 +134,7 @@ function PageHeader() {
   };
 
   const handleCreateInvoiceSuccess = () => {
-    enqueueSnackbar(t('A new invoice has been created successfully'), {
+    enqueueSnackbar(t('La contratación ha sido publicada en el sistema exitosamente'), {
       variant: 'success',
       anchorOrigin: {
         vertical: 'top',
@@ -227,22 +184,60 @@ function PageHeader() {
         </DialogTitle>
         <Formik
           initialValues={{
-            contracteeName: '',
+            contractingName: '',
+            contractingEntityRuc: '',
             contractorName: '',
-            contractAmount: '',
+            contractorRuc: '',
+            contractAmount: 0,
+            description: '',
             submit: null
           }}
           validationSchema={Yup.object().shape({
-            contracteeName: Yup.string()
+            contractingName: Yup.string()
               .max(255)
               .required("El nombre del contratante es requerido")
+            , contractingEntityRuc: Yup.string()
+              .max(255)
+              .required("El RUC del contratante es requerido")
+            , contractorName: Yup.string()
+              .max(255)
+              .required("El nombre del contratista es requerido")
+            , contractorRuc: Yup.string()
+              .max(255)
+              .required("El RUC del contratista es requerido")
           })}
           onSubmit={async (
             _values,
             { resetForm, setErrors, setStatus, setSubmitting }
           ) => {
             try {
-              await wait(1000);
+              const newEProcurement = {
+                contractingEntityName: _values.contractingName,
+                contractingEntityRuc: _values.contractingEntityRuc,
+                contractorName: _values.contractorName,
+                contractorRuc: _values.contractorRuc,
+                procurementObject: selectedProcurementObject.translation,
+                amount: parseInt(_values.contractAmount),
+                department: "Lima",
+                province: "Lima",
+                district: "Lima",
+                contractStartDate,
+                contractEndDate,
+                description: _values.description,
+              };
+
+              const json = JSON.stringify(newEProcurement);
+              const blob = new Blob([json], {
+                type: 'application/json'
+              });
+              formData.append("json", blob);
+              await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements`, formData,
+                    {
+                      headers: {
+                        "Content-Type": "multipart/form-data",
+                      },
+                    }
+              );
               resetForm();
               setStatus({ success: true });
               setSubmitting(false);
@@ -301,24 +296,24 @@ function PageHeader() {
                     md={9}
                   >
                     <TextField
-                      error={Boolean(touched.contracteeName && errors.contracteeName)}
-                      helperText={touched.contracteeName && errors.contracteeName}
-                      name="contracteeName"
+                      error={Boolean(touched.contractingName && errors.contractingName)}
+                      helperText={touched.contractingName && errors.contractingName}
+                      name="contractingName"
                       placeholder="Escriba nombre del contratante"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      value={values.contracteeName}
+                      value={values.contractingName}
                       variant="outlined"
                     />
 
                     <TextField
-                      error={Boolean(touched.contracteeRUC && errors.contracteeRUC)}   
-                      helperText={touched.contracteeRUC && errors.contracteeRUC}
-                      name="contracteeRUC"
+                      error={Boolean(touched.contractingEntityRuc && errors.contractingEntityRuc)}   
+                      helperText={touched.contractingEntityRuc && errors.contractingEntityRuc}
+                      name="contractingEntityRuc"
                       placeholder="Escriba RUC del contratante"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      value={values.contracteeRUC}
+                      value={values.contractingEntityRuc}
                       variant="outlined"
                     />
                   </Grid>
@@ -361,13 +356,13 @@ function PageHeader() {
                       variant="outlined"
                     />
                     <TextField
-                      error={Boolean(touched.contractorRUC && errors.contractorRUC)}
-                      helperText={touched.contractorRUC && errors.contractorRUC}
-                      name="contractorRUC"
+                      error={Boolean(touched.contractorRuc && errors.contractorRuc)}
+                      helperText={touched.contractorRuc && errors.contractorRuc}
+                      name="contractorRuc"
                       placeholder="Escriba RUC del contratista"
                       onBlur={handleBlur}
                       onChange={handleChange}
-                      value={values.contractorRUC}
+                      value={values.contractorRuc}
                       variant="outlined"
                     />
                   </Grid>
@@ -389,8 +384,8 @@ function PageHeader() {
                     >
                         <b>Objeto de contratación: </b>
                       </Box>
-                    </Grid>
-                    <Grid
+                  </Grid>
+                  <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
                     }}
@@ -406,6 +401,7 @@ function PageHeader() {
                         limitTags={2}
                         getOptionLabel={(option) => option.title}
                         options={contractObjects}
+                        onChange={(event,newValue)=> setSelectedProcurementObject(newValue)}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -434,8 +430,8 @@ function PageHeader() {
                       >
                         <b>Monto(soles): </b>
                       </Box>
-                    </Grid>
-                    <Grid
+                  </Grid>
+                  <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
                     }}
@@ -474,8 +470,8 @@ function PageHeader() {
                       >
                         <b>Departamento: </b>
                       </Box>
-                    </Grid>
-                    <Grid
+                  </Grid>
+                  <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
                     }}
@@ -490,7 +486,7 @@ function PageHeader() {
                         }}
                         limitTags={2}
                         getOptionLabel={(option) => option.title}
-                        options={contractObjects}
+                        options={[{title:"Lima"}]}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -519,8 +515,8 @@ function PageHeader() {
                       >
                         <b>Provincia: </b>
                       </Box>
-                    </Grid>
-                    <Grid
+                  </Grid>
+                  <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
                     }}
@@ -535,7 +531,7 @@ function PageHeader() {
                         }}
                         limitTags={2}
                         getOptionLabel={(option) => option.title}
-                        options={contractObjects}
+                        options={[{title:"Lima"}]}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -564,8 +560,8 @@ function PageHeader() {
                       >
                         <b>Distrito: </b>
                       </Box>
-                    </Grid>
-                    <Grid
+                  </Grid>
+                  <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
                     }}
@@ -580,7 +576,7 @@ function PageHeader() {
                         }}
                         limitTags={2}
                         getOptionLabel={(option) => option.title}
-                        options={contractObjects}
+                        options={[{title:"ATE"}]}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -620,14 +616,14 @@ function PageHeader() {
                     md={9}
                   >
                     <DatePicker
-                      value={value}
+                      value={contractStartDate}
                       onChange={(newValue) => {
-                        setValue(newValue);
+                        setContractStartDate(newValue);
                       }}
                       renderInput={(params) => (
                         <TextField
                           fullWidth
-                          placeholder="Seleccione una fecha"
+                          placeholder="Seleccione la fecha inicio del contrato"
                           {...params}
                           // TODO: latin date format
                         />
@@ -663,14 +659,14 @@ function PageHeader() {
                     md={9}
                   >
                     <DatePicker
-                      value={value1}
+                      value={contractEndDate}
                       onChange={(newValue1) => {
-                        setValue1(newValue1);
+                        setContractEndDate(newValue1);
                       }}
                       renderInput={(params) => (
                         <TextField
                           fullWidth
-                          placeholder="Seleccione una fecha"
+                          placeholder="Seleccione la fecha del fin de contrato"
                           {...params}
                         />
                       )}
@@ -694,8 +690,8 @@ function PageHeader() {
                       >
                       <b>Documentos:</b>
                       </Box>
-                      </Grid>
-                      <Grid
+                  </Grid>
+                  <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
                     }}
@@ -716,7 +712,7 @@ function PageHeader() {
                                 mt: 2
                               }}
                             >
-                              {t('Drop the files to start uploading')}
+                              Coloca aquí los documentos a subir
                             </Typography>
                           </>
                         )}
@@ -771,8 +767,8 @@ function PageHeader() {
                           </List>
                         </>
                       )}
-                   </Grid>
-                   <Grid
+                  </Grid>
+                  <Grid
                     item
                     xs={12}
                     sm={4}
@@ -790,7 +786,7 @@ function PageHeader() {
                       >
                       <b>Descripción:</b>
                       </Box>
-                      </Grid>
+                  </Grid>
                    <Grid
                     sx={{
                       mb: `${theme.spacing(3)}`
@@ -803,6 +799,10 @@ function PageHeader() {
                       <TextField
                         multiline
                         placeholder="Escriba algún resumen de la contratación"
+                        onBlur={handleBlur}
+                        onChange={handleChange}
+                        name="description"
+                        value={values.description}
                         fullWidth
                         minRows={3}
                         maxRows={8}
