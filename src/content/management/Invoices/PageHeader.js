@@ -34,6 +34,10 @@ import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import CloudUploadTwoToneIcon from '@mui/icons-material/CloudUploadTwoTone';
 import CloseTwoToneIcon from '@mui/icons-material/CloseTwoTone';
 import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
+import departmentList from '../../../mocks/departments';
+import provincesJSON from '../../../mocks/provinces';
+import districtsJSON from '../../../mocks/districts';
+
 
 const BoxUploadWrapper = styled(Box)(
   ({ theme }) => `
@@ -80,10 +84,14 @@ const AvatarDanger = styled(Avatar)(
 `
 );
 
+
+
 function PageHeader() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [selectedProcurementObject, setSelectedProcurementObject] = useState(null);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
   const [formData, setFormData] = useState(new FormData());
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
@@ -146,6 +154,22 @@ function PageHeader() {
     setOpen(false);
   };
 
+
+  const handleDepartmentChange = (event, value) =>{
+    if (value) {
+        setProvinces(provincesJSON[value.id_ubigeo]);
+    } else {
+      setProvinces([]);
+      setDistricts([]);
+    }
+  };  
+  const handleProvinceChange = (event, value) =>{
+    if (value) {
+        setDistricts(districtsJSON[value.id_ubigeo]);
+    } else {
+      setDistricts([]);
+    }
+  };  
   return (
     <>
       <Grid container justifyContent="space-between" alignItems="center">
@@ -153,6 +177,9 @@ function PageHeader() {
           <Typography variant="h3" component="h3" gutterBottom>
             Contrataciones públicas a dar seguimiento
           </Typography>
+        </Grid>
+        <Grid item>
+              <a href="http://contratos.seace.gob.pe/busqueda/#/buscar  " target="_blank" rel="noreferrer" > ¿No sabes de dónde sacar la información necesaria? Ingresa al portal del estado </a>
         </Grid>
         <Grid item>
           <Button
@@ -485,8 +512,9 @@ function PageHeader() {
                           m: 0
                         }}
                         limitTags={2}
-                        getOptionLabel={(option) => option.title}
-                        options={[{title:"Lima"}]}
+                        onChange={handleDepartmentChange}
+                        getOptionLabel={(option) => option.nombre_ubigeo}
+                        options={departmentList}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -530,8 +558,10 @@ function PageHeader() {
                           m: 0
                         }}
                         limitTags={2}
-                        getOptionLabel={(option) => option.title}
-                        options={[{title:"Lima"}]}
+                        onChange={handleProvinceChange}
+                        getOptionLabel={(option) => option.nombre_ubigeo}
+                        options={provinces}
+                        disabled={provinces.length === 0}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -575,8 +605,9 @@ function PageHeader() {
                           m: 0
                         }}
                         limitTags={2}
-                        getOptionLabel={(option) => option.title}
-                        options={[{title:"ATE"}]}
+                        getOptionLabel={(option) => option.nombre_ubigeo}
+                        options={districts}
+                        disabled={districts.length === 0}
                         renderInput={(params) => (
                           <TextField
                             {...params}
@@ -754,7 +785,7 @@ function PageHeader() {
                             }}
                             severity="success"
                           >
-                            Has subido <b>{files.length}</b>{' '}
+                            Se van a subir <b>{files.length}</b>{' '}
                             archivo(s)!
                           </Alert>
                           <Divider

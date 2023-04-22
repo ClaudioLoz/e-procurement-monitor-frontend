@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 import {
@@ -23,7 +23,8 @@ import {
 // import useAuth from 'src/hooks/useAuth';
 import DownloadTwoToneIcon from '@mui/icons-material/DownloadTwoTone';
 import numeral from 'numeral';
-// import axios from 'axios';
+import axios from 'axios';
+import useRefMounted from 'src/hooks/useRefMounted';
 
 import ReviewsTab from './ReviewsTab';
 import AdditionalInfoTab from './AdditionalInfoTab';
@@ -51,11 +52,49 @@ const typographySx = {
   mb: 2
 };
 
+const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12:true };
+const map = {
+  WORK: {
+    text: 'OBRA',
+    color: 'warning'
+  },
+  GOOD: {
+    text: 'BIEN',
+    color: 'info'
+  },
+  SERVICE: {
+    text: 'SERVICIO',
+    color: 'primary'
+  }
+};
 
 const EProcurementBody = ({ eProcurement }) => {
   // const { user } = useAuth();
-
   const [currentTab, setCurrentTab] = useState('reviews');
+  const [comments, setComments] = useState([]);
+  const isMountedRef = useRefMounted();
+  const getComments = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/comments`,{
+        params:{
+          eProcurementId: eProcurement.eprocurement.id,
+        }
+      });
+      if (isMountedRef.current) {
+        setComments(response.data.map( comment => {
+          // if(comment.image) comment.url = URL.createObjectURL(new Blob([comment.image]));
+          comment.date = new Date(comment.createdDate).toLocaleString( 'es-PE', options);
+          return comment;
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [isMountedRef]);
+
+  useEffect(() => {
+    getComments();
+  }, [getComments]);
 
   const tabs = [
     { value: 'reviews', label: "Comentarios" },
@@ -86,7 +125,7 @@ const EProcurementBody = ({ eProcurement }) => {
               Contratista: {`${eProcurement.eprocurement.contractorName} - ${eProcurement.eprocurement.contractorRuc}`}
             </Typography>
             <Typography variant="h4" gutterBottom sx={typographySx}>
-              Objeto de contratación: {eProcurement.eprocurement.procurementObject}
+              Objeto de contratación: {map[eProcurement.eprocurement.procurementObject].text}
             </Typography>
             <Typography variant="h4" gutterBottom sx={typographySx}>
               Monto:  S/. {numeral(eProcurement.eprocurement.amount).format('0,0')}
@@ -180,9 +219,9 @@ const EProcurementBody = ({ eProcurement }) => {
             </Tabs>
           </TabsContainerWrapper>
           <Divider />
-          {currentTab === 'reviews' && <ReviewsTab eProcurementId={eProcurement.eprocurement.id}/>}
+          {currentTab === 'reviews' && <ReviewsTab comments={comments}/>}
           {currentTab === 'additional_info' && <AdditionalInfoTab description={eProcurement.eprocurement.description}/>}
-          <BottomBarContent eProcurementId={eProcurement.eprocurement.id}/>
+          <BottomBarContent setComments={setComments} eProcurementId={eProcurement.eprocurement.id}/>
         </Card>
       </Grid>
     </Container>

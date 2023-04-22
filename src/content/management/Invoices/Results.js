@@ -104,7 +104,7 @@ const applyFilters = (eprocurements, query, filters) => {
     let matches = true;
 
     if (query) {
-      const properties = ['clientName'];
+      const properties = ['contractingEntityName', 'contractorName', 'contractingEntityRuc', 'contractorRuc'];
       let containsQuery = false;
 
       properties.forEach((property) => {
@@ -139,6 +139,7 @@ const applyPagination = (eprocurements, page, limit) => {
 };
 
 const Results = ({ eprocurements }) => {
+  console.log(eprocurements)
   const [selectedItems, setSelectedInvoices] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
@@ -234,7 +235,7 @@ const Results = ({ eprocurements }) => {
                 m: 0
               }}
               onChange={handleQueryChange}
-              placeholder="Buscar contratación pública por nombre de entidad contratante o contratista"
+              placeholder="Buscar por nombre o RUC de contratante o contratista"
               value={query}
               fullWidth
               variant="outlined"

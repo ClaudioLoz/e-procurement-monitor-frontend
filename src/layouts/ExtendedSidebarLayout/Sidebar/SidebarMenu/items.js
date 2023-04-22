@@ -3,7 +3,7 @@
 // import StorefrontTwoToneIcon from '@mui/icons-material/StorefrontTwoTone';
 // import ReceiptTwoToneIcon from '@mui/icons-material/ReceiptTwoTone';
 import BackupTableTwoToneIcon from '@mui/icons-material/BackupTableTwoTone';
-import SmartToyTwoToneIcon from '@mui/icons-material/SmartToyTwoTone';
+import ThumbsUpDownIcon from '@mui/icons-material/ThumbsUpDown';
 
 const menuItems = [
   {
@@ -16,7 +16,7 @@ const menuItems = [
       },
       {
         name: 'Contrataciones a evaluar',
-        icon: SmartToyTwoToneIcon,
+        icon: ThumbsUpDownIcon,
         link: '/contrataciones-evaluacion/lista',
       }
     ]

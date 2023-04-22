@@ -7,38 +7,16 @@ import {
   // Button,
   Avatar,
 } from '@mui/material';
-import useRefMounted from 'src/hooks/useRefMounted';
-import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
 
-function ReviewsTab({eProcurementId}) {
-  const isMountedRef = useRefMounted();
-  const [comments, setComments] = useState([]);
-  const getComments = useCallback(async () => {
-    try {
-      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/comments`,{
-        params:{
-          eProcurementId
-        }
-      });
-      if (isMountedRef.current) {
-        setComments(response.data.map( comment => {
-          if(comment.image.length > 0 ) comment.url = URL.createObjectURL(new Blob([comment.image]));
-          return comment;
-        }));
-      }
-    } catch (err) {
-      console.error(err);
-    }
-  }, [isMountedRef]);
+// import axios from 'axios';
 
-  useEffect(() => {
-    getComments();
-  }, [getComments]);
+
+const names = ["Eduardo Torres", "Luis Flores", "Juan Rodriguez", "Marcelo Hurtado"];
+function ReviewsTab({comments}) {
 
   return (
     <>
-      { comments.length === 0 ?
+      { comments?.length === 0 ?
         ( 
         <>
           <Typography
@@ -57,7 +35,7 @@ function ReviewsTab({eProcurementId}) {
         :
             (<List>
               {
-                comments.map( comment =>{
+                comments.map( (comment) =>{
                   return (<>
                 <ListItem
                   sx={{
@@ -74,7 +52,7 @@ function ReviewsTab({eProcurementId}) {
                       }
                     }}
                   >
-                    <Avatar src="/static/images/avatars/5.jpg" />
+                    <Avatar src="/static/images/avatars/0.jpg" />
                     <Typography
                       sx={{
                         mt: 1,
@@ -82,12 +60,12 @@ function ReviewsTab({eProcurementId}) {
                       }}
                       variant="h5"
                     >
-                      Brook Holding
+                       {names[Math.floor(Math.random() * names.length)]}
                     </Typography>
                   </Box>
                   <Box flex={1}>
-                    {comment.url?
-                          <img key={comment.url} src={comment.url} alt="comentario como imagen" />
+                    {comment.image?
+                          <img key={comment.id} src={`data:image/jpeg;base64,${comment.image}`} alt="comentario como imagen"  style={{ maxWidth: '600px', height: 'auto' }} />
                     :
                         (<Typography
                             sx={{
@@ -106,7 +84,7 @@ function ReviewsTab({eProcurementId}) {
                     >
                       <Box display="flex" alignItems="center">
                         <Typography variant="subtitle2" color="text.primary">
-                        {comment.createdDate}
+                        {comment.date}
                         </Typography>
                       </Box>
                     </Box>

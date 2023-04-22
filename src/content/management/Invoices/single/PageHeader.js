@@ -3,14 +3,14 @@ import {
   Grid,
   Typography,
   Tooltip,
-  Button,
+  // Button,
   Container,
   IconButton
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 import ArrowBackTwoToneIcon from '@mui/icons-material/ArrowBackTwoTone';
-import StarIcon from '@mui/icons-material/Star';
+// import StarIcon from '@mui/icons-material/Star';
 // import PropTypes from 'prop-types';
 
 const PageHeader = () => {
@@ -20,8 +20,8 @@ const PageHeader = () => {
   const handleBack = () => {
     return navigate(`/${location.pathname.split('/')[1]}/lista`);
   };
-  const handleFollow = () => {
-  };
+  // const handleFollow = () => {
+  // };
   return (
     <Container maxWidth="lg">
       <Grid container justifyContent="space-between" alignItems="center">
@@ -50,7 +50,7 @@ const PageHeader = () => {
             </Box>
           </Box>
         </Grid>
-        <Grid item>
+        {/* <Grid item>
           <Button
             sx={{
               mt: { xs: 2, sm: 0 }
@@ -61,7 +61,7 @@ const PageHeader = () => {
           >
             Favoritos
           </Button>
-        </Grid>
+        </Grid> */}
       </Grid>
     </Container>
   );

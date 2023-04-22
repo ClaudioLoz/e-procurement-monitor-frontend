@@ -29,22 +29,33 @@ const Input = styled('input')({
   display: 'none'
 });
 
-function BottomBarContent({eProcurementId}) {
+function BottomBarContent({eProcurementId, setComments}) {
   // const { user } = useAuth();
   const theme = useTheme();
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState(null);
   const [imageBytes, setImageBytes] = useState(null);
-
-
+  const [selectedFileName, setSelectedFileName] = useState('');
+  const [inputDisabled, setInputDisabled] = useState(false);
 
   const handleInputChange = (event) => {
     setInputValue(event.target.value);
   };
 
+  const handleClear = () => {
+    setInputDisabled(false);
+    setImageBytes(null);
+    setInputValue('');
+    setSelectedFileName('');
+  };
+
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
 
     if (file) {
+      setInputValue('');
+      setSelectedFileName(file.name);
+      setInputDisabled(true);
       const reader = new FileReader();
       reader.readAsArrayBuffer(file);
 
@@ -60,7 +71,7 @@ function BottomBarContent({eProcurementId}) {
     const formData = new FormData();
     formData.append('image', new Blob([imageBytes]));
     const newComment = {
-      eProcurementId,
+      eprocurementId: eProcurementId,
       text: inputValue
     };
 
@@ -69,8 +80,15 @@ function BottomBarContent({eProcurementId}) {
       type: 'application/json'
     });
     formData.append("json", blob);
-    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/comments`, formData);
+    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/comments`, formData,
+    {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
     console.log(response)
+    setComments(prev => [...prev, response.data]);
+    handleClear();
   };
 
   return (
@@ -94,6 +112,7 @@ function BottomBarContent({eProcurementId}) {
           fullWidth
           value={inputValue}
           onChange={handleInputChange}
+          disabled={inputDisabled}
         />
       </Box>
       <Box>
@@ -108,6 +127,7 @@ function BottomBarContent({eProcurementId}) {
         <Button startIcon={<SendTwoToneIcon />} variant="contained" onClick={handleSubmit}>
           Enviar
         </Button>
+        {selectedFileName && <p>Imagen a adjuntar: {selectedFileName}</p>}
       </Box>
     </Box>
   );
