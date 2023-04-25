@@ -13,7 +13,7 @@ import monitoredProcurementRoutes from './monitoredProcurement';
 
 const router = [
   {
-    path: 'account',
+    path: 'cuenta',
     children: accountRoutes
   },
 

@@ -35,7 +35,7 @@ const RecoverPassword = Loader(
 
 const accountRoutes = [
   {
-    path: 'login',
+    path: 'login-ss',
     element: (
       <Guest>
         <LoginCover />
@@ -51,7 +51,7 @@ const accountRoutes = [
     )
   },
   {
-    path: 'login-basic',
+    path: 'login',
     element: <LoginBasic />
   },
   {
@@ -71,7 +71,7 @@ const accountRoutes = [
     )
   },
   {
-    path: 'register-basic',
+    path: 'creacion',
     element: <RegisterBasic />
   },
   {

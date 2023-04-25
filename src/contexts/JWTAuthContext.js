@@ -112,9 +112,9 @@ export const AuthProvider = (props) => {
     initialize();
   }, []);
 
-  const login = async (email, password) => {
-    const response = await axios.post('/api/account/login', {
-      email,
+  const login = async (username, password) => {
+    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/auth/sign-in`, {
+      username,
       password
     });
     const { accessToken, user } = response.data;
@@ -133,10 +133,11 @@ export const AuthProvider = (props) => {
     dispatch({ type: 'LOGOUT' });
   };
 
-  const register = async (email, name, password) => {
-    const response = await axios.post('/api/account/register', {
+  const register = async (email, name, username, password) => {
+    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/auth/sign-up`, {
       email,
       name,
+      username,
       password
     });
     const { accessToken, user } = response.data;

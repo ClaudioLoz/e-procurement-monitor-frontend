@@ -3,54 +3,18 @@ import {
   Box,
   Card,
   Link,
-  Tooltip,
-  Typography,
+  // Tooltip,
+    Typography,
   Container,
-  Alert,
+  // Alert,
   styled
 } from '@mui/material';
 import { Helmet } from 'react-helmet-async';
 import useAuth from 'src/hooks/useAuth';
-import Auth0Register from '../RegisterAuth0';
-import FirebaseAuthRegister from '../RegisterFirebaseAuth';
 import JWTRegister from '../RegisterJWT';
-import AmplifyRegister from '../RegisterAmplify';
-import { useTranslation } from 'react-i18next';
-import Logo from 'src/components/LogoSign';
+// import Logo from 'src/components/LogoSign';
 
-const icons = {
-  Auth0: '/static/images/logo/auth0.svg',
-  FirebaseAuth: '/static/images/logo/firebase.svg',
-  JWT: '/static/images/logo/jwt.svg',
-  Amplify: '/static/images/logo/amplify.svg'
-};
 
-const CardImg = styled(Card)(
-  ({ theme }) => `
-    width: 90px;
-    height: 80px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    background: ${theme.colors.alpha.white[100]};
-    margin: 0 ${theme.spacing(1)};
-    border: 1px solid ${theme.colors.alpha.black[10]};
-    transition: ${theme.transitions.create(['all'])};
-
-    &:hover {
-      border-color: ${theme.colors.primary.main};
-    }
-`
-);
-const BottomWrapper = styled(Box)(
-  ({ theme }) => `
-    padding: ${theme.spacing(3)};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-`
-);
 
 const MainContent = styled(Box)(
   () => `
@@ -72,17 +36,16 @@ const TopWrapper = styled(Box)(
 
 function RegisterBasic() {
   const { method } = useAuth();
-  const { t } = useTranslation();
 
   return (
     <>
       <Helmet>
-        <title>Register - Basic</title>
+        <title>Registro usuario</title>
       </Helmet>
       <MainContent>
         <TopWrapper>
           <Container maxWidth="sm">
-            <Logo />
+              {/* <Logo /> */}
             <Card
               sx={{
                 mt: 3,
@@ -98,7 +61,7 @@ function RegisterBasic() {
                     mb: 1
                   }}
                 >
-                  {t('Create account')}
+                 Creación de usuario
                 </Typography>
                 <Typography
                   variant="h4"
@@ -108,13 +71,10 @@ function RegisterBasic() {
                     mb: 3
                   }}
                 >
-                  {t('Fill in the fields below to sign up for an account.')}
+                  Complete los campos con la información necesaria para crear su usuario
                 </Typography>
               </Box>
-              {method === 'Auth0' && <Auth0Register />}
-              {method === 'FirebaseAuth' && <FirebaseAuthRegister />}
               {method === 'JWT' && <JWTRegister />}
-              {method === 'Amplify' && <AmplifyRegister />}
               <Box mt={4}>
                 <Typography
                   component="span"
@@ -122,46 +82,13 @@ function RegisterBasic() {
                   color="text.primary"
                   fontWeight="bold"
                 >
-                  {t('Already have an account?')}
+                  ¿Ya estás registrado?
                 </Typography>{' '}
-                <Link component={RouterLink} to="/account/login-basic">
-                  <b>{t('Sign in here')}</b>
+                <Link component={RouterLink} to="/cuenta/login">
+                  <b>Inicia sesión aquí</b>
                 </Link>
               </Box>
             </Card>
-            <BottomWrapper>
-              <Box mb={3}>
-                <Tooltip arrow placement="top" title="Auth0">
-                  <CardImg>
-                    <img height={50} alt="Auth0" src={icons['Auth0']} />
-                  </CardImg>
-                </Tooltip>
-                <Tooltip arrow placement="top" title="Firebase">
-                  <CardImg>
-                    <img
-                      height={50}
-                      alt="Firebase"
-                      src={icons['FirebaseAuth']}
-                    />
-                  </CardImg>
-                </Tooltip>
-                <Tooltip arrow placement="top" title="JSON Web Token">
-                  <CardImg>
-                    <img height={50} alt="JSON Web Token" src={icons['JWT']} />
-                  </CardImg>
-                </Tooltip>
-                <Tooltip arrow placement="top" title="Amplify">
-                  <CardImg>
-                    <img height={50} alt="Amplify" src={icons['Amplify']} />
-                  </CardImg>
-                </Tooltip>
-              </Box>
-            </BottomWrapper>
-            <Alert severity="warning">
-              {t(
-                'Learn how to switch between auth methods by reading the section we’ve prepared in the documentation.'
-              )}
-            </Alert>
           </Container>
         </TopWrapper>
       </MainContent>

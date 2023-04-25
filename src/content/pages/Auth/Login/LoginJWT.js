@@ -4,49 +4,47 @@ import { Formik } from 'formik';
 import { Link as RouterLink } from 'react-router-dom';
 
 import {
-  Box,
+  // Box,
   Button,
   FormHelperText,
   TextField,
-  Checkbox,
-  Typography,
+  // Checkbox,
+  // Typography,
   Link,
-  FormControlLabel,
+  // FormControlLabel,
   CircularProgress
 } from '@mui/material';
 import useAuth from 'src/hooks/useAuth';
 import useRefMounted from 'src/hooks/useRefMounted';
-import { useTranslation } from 'react-i18next';
 
 const LoginJWT = () => {
   const { login } = useAuth();
   const isMountedRef = useRefMounted();
-  const { t } = useTranslation();
 
   return (
-    <Formik
+    <> <Formik
       initialValues={{
-        email: 'demo@example.com',
-        password: 'TokyoPass1@',
+        nin: '',
+        password: '',
         terms: true,
         submit: null
       }}
       validationSchema={Yup.object().shape({
-        email: Yup.string()
-          .email(t('The email provided should be a valid email address'))
-          .max(255)
-          .required(t('The email field is required')),
+        nin: Yup.string()
+          .min(8, "El DNI es de 8 dígitos")
+          .max(8, "El DNI es de 8 dígitos")
+          .required("El DNI es requerido"),
         password: Yup.string()
           .max(255)
-          .required(t('The password field is required')),
-        terms: Yup.boolean().oneOf(
-          [true],
-          t('You must agree to our terms and conditions')
-        )
+          .required("La contraseña es requerida"),
+        // terms: Yup.boolean().oneOf(
+        //   [true],
+        //   "Tiene que leer y aceptar los términos y condiciones"
+        // )
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          await login(values.email, values.password);
+          await login(values.nin, values.password);
 
           if (isMountedRef.current) {
             setStatus({ success: true });
@@ -73,17 +71,16 @@ const LoginJWT = () => {
       }) => (
         <form noValidate onSubmit={handleSubmit}>
           <TextField
-            error={Boolean(touched.email && errors.email)}
+            error={Boolean(touched.nin && errors.nin)}
             fullWidth
             margin="normal"
             autoFocus
-            helperText={touched.email && errors.email}
-            label={t('Email address')}
-            name="email"
+            helperText={touched.nin && errors.nin}
+            label="Número de DNI"
+            name="nin"
             onBlur={handleBlur}
             onChange={handleChange}
-            type="email"
-            value={values.email}
+            value={values.nin}
             variant="outlined"
           />
           <TextField
@@ -91,7 +88,7 @@ const LoginJWT = () => {
             fullWidth
             margin="normal"
             helperText={touched.password && errors.password}
-            label={t('Password')}
+            label="Contraseña"
             name="password"
             onBlur={handleBlur}
             onChange={handleChange}
@@ -99,7 +96,7 @@ const LoginJWT = () => {
             value={values.password}
             variant="outlined"
           />
-          <Box
+          {/* <Box
             alignItems="center"
             display={{ xs: 'block', md: 'flex' }}
             justifyContent="space-between"
@@ -117,9 +114,9 @@ const LoginJWT = () => {
                 label={
                   <>
                     <Typography variant="body2">
-                      {t('I accept the')}{' '}
+                      Acepto los {' '}
                       <Link component="a" href="#">
-                        {t('terms and conditions')}
+                        términos y condiciones
                       </Link>
                       .
                     </Typography>
@@ -130,7 +127,7 @@ const LoginJWT = () => {
             <Link component={RouterLink} to="/account/recover-password">
               <b>{t('Lost password?')}</b>
             </Link>
-          </Box>
+        </Box> */}
 
           {Boolean(touched.terms && errors.terms) && (
             <FormHelperText error>{errors.terms}</FormHelperText>
@@ -148,11 +145,27 @@ const LoginJWT = () => {
             size="large"
             variant="contained"
           >
-            {t('Sign in')}
+            Iniciar Sesión
           </Button>
         </form>
       )}
     </Formik>
+    <Link component={RouterLink} to="/contrataciones-seguimiento">
+            <Button
+            sx={{
+              mt: 3
+            }}
+            color="primary"
+            type="submit"
+            fullWidth
+            size="large"
+            variant="contained"
+          >
+            Ingresar como visitante
+          </Button>
+    </Link>
+   
+   </>
   );
 };
 

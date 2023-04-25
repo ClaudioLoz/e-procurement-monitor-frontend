@@ -2,12 +2,12 @@ import * as Yup from 'yup';
 import { Formik } from 'formik';
 import {
   Button,
-  Checkbox,
+  // Checkbox,
   FormHelperText,
   TextField,
-  Typography,
-  FormControlLabel,
-  Link,
+  // Typography,
+  // FormControlLabel,
+  // Link,
   CircularProgress
 } from '@mui/material';
 import useAuth from 'src/hooks/useAuth';
@@ -24,6 +24,7 @@ function RegisterJWT() {
       initialValues={{
         email: '',
         name: '',
+        nin: '',
         password: '',
         terms: false,
         submit: null
@@ -32,16 +33,15 @@ function RegisterJWT() {
         email: Yup.string()
           .email(t('The email provided should be a valid email address'))
           .max(255)
-          .required(t('The email field is required')),
-        name: Yup.string().max(255).required(t('The name field is required')),
+          .required("El correo es requerido"),
+        name: Yup.string().max(255).required("El nombre es requerido"),
+        nin: Yup.string()
+          .min(8, "El DNI es de 8 dígitos")
+          .max(8, "El DNI es de 8 dígitos")
+          .required("El DNI es requerido"),
         password: Yup.string()
-          .min(8)
           .max(255)
-          .required(t('The password field is required')),
-        terms: Yup.boolean().oneOf(
-          [true],
-          t('You must agree to our terms and conditions')
-        )
+          .required("La contraseña es requerida"),
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
@@ -74,7 +74,7 @@ function RegisterJWT() {
             fullWidth
             margin="normal"
             helperText={touched.name && errors.name}
-            label={t('Name')}
+            label="Nombre"
             name="name"
             onBlur={handleBlur}
             onChange={handleChange}
@@ -82,11 +82,23 @@ function RegisterJWT() {
             variant="outlined"
           />
           <TextField
+            error={Boolean(touched.nin && errors.nin)}
+            fullWidth
+            margin="normal"
+            helperText={touched.nin && errors.nin}
+            label="DNI"
+            name="nin"
+            onBlur={handleBlur}
+            onChange={handleChange}
+            value={values.nin}
+            variant="outlined"
+          />
+          <TextField
             error={Boolean(touched.email && errors.email)}
             fullWidth
             margin="normal"
             helperText={touched.email && errors.email}
-            label={t('Email address')}
+            label="Correo electrónico"
             name="email"
             onBlur={handleBlur}
             onChange={handleChange}
@@ -99,7 +111,7 @@ function RegisterJWT() {
             fullWidth
             margin="normal"
             helperText={touched.password && errors.password}
-            label={t('Password')}
+            label="Contraseña"
             name="password"
             onBlur={handleBlur}
             onChange={handleChange}
@@ -107,27 +119,27 @@ function RegisterJWT() {
             value={values.password}
             variant="outlined"
           />
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={values.terms}
-                name="terms"
-                color="primary"
-                onChange={handleChange}
-              />
-            }
-            label={
-              <>
-                <Typography variant="body2">
-                  {t('I accept the')}{' '}
-                  <Link component="a" href="#">
-                    {t('terms and conditions')}
-                  </Link>
-                  .
-                </Typography>
-              </>
-            }
-          />
+            {/* <FormControlLabel
+              control={
+                <Checkbox
+                  checked={values.terms}
+                  name="terms"
+                  color="primary"
+                  onChange={handleChange}
+                />
+              }
+              label={
+                <>
+                  <Typography variant="body2">
+                  Acepto los {' '}
+                    <Link component="a" href="#">
+                    términos y condiciones
+                    </Link>
+                    .
+                  </Typography>
+                </>
+              }
+            /> */}
           {Boolean(touched.terms && errors.terms) && (
             <FormHelperText error>{errors.terms}</FormHelperText>
           )}
@@ -143,7 +155,7 @@ function RegisterJWT() {
             size="large"
             variant="contained"
           >
-            {t('Create your account')}
+            Crear usuario
           </Button>
         </form>
       )}
