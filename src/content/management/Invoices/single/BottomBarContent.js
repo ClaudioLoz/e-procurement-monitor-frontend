@@ -10,7 +10,7 @@ import {
   InputBase,
   useTheme
 } from '@mui/material';
-// import useAuth from 'src/hooks/useAuth';
+import useAuth from 'src/hooks/useAuth';
 import AttachFileTwoToneIcon from '@mui/icons-material/AttachFileTwoTone';
 import SendTwoToneIcon from '@mui/icons-material/SendTwoTone';
 import { useState } from 'react';
@@ -30,7 +30,7 @@ const Input = styled('input')({
 });
 
 function BottomBarContent({eProcurementId, setComments}) {
-  // const { user } = useAuth();
+  const auth = useAuth();
   const theme = useTheme();
   const [inputValue, setInputValue] = useState(null);
   const [imageBytes, setImageBytes] = useState(null);
@@ -101,30 +101,27 @@ function BottomBarContent({eProcurementId, setComments}) {
       }}
     >
       <Box flexGrow={1} display="flex" alignItems="center">
-        {/* <Avatar
-          sx={{ display: { xs: 'none', sm: 'flex' }, mr: 1 }}
-          alt="{user.name}"
-          src="{user.avatar}"
-        /> */}
+      <Tooltip arrow placement="top" title={!auth.isAuthenticated? "Regístrese en el sistema y empiece a contribuir al seguimiento" : ""}>
         <MessageInputWrapper
           autoFocus
-          placeholder="Escriba su comentario aquí o adjunte una imagen de lo que sucede"
+          placeholder= "Escriba su comentario aquí o adjunte una imagen de lo que sucede"
           fullWidth
           value={inputValue}
           onChange={handleInputChange}
-          disabled={inputDisabled}
+          disabled={inputDisabled || !auth.isAuthenticated}
         />
+      </Tooltip>
       </Box>
       <Box>
-        <Input accept="image/*" id="messenger-upload-file" type="file" onChange={handleFileUpload} />
+        <Input disabled={!auth.isAuthenticated} accept="image/*" id="messenger-upload-file" type="file" onChange={handleFileUpload} />
         <Tooltip arrow placement="top" title="Adjunte imagen">
           <label htmlFor="messenger-upload-file">
-            <IconButton sx={{ mx: 1 }} color="primary" component="span">
+            <IconButton sx={{ mx: 1 }}  disabled={!auth.isAuthenticated}  color="primary" component="span">
               <AttachFileTwoToneIcon fontSize="small" />
             </IconButton>
           </label>
         </Tooltip>
-        <Button startIcon={<SendTwoToneIcon />} variant="contained" onClick={handleSubmit}>
+        <Button startIcon={<SendTwoToneIcon />} variant="contained" onClick={handleSubmit}  disabled={!auth.isAuthenticated} >
           Enviar
         </Button>
         {selectedFileName && <p>Imagen a adjuntar: {selectedFileName}</p>}

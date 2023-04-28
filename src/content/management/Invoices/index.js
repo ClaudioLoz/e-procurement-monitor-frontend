@@ -34,7 +34,7 @@ function ManagementMonitoredProcurement() {
         <title>Contrataciones a dar seguimiento</title>
       </Helmet>
       <PageTitleWrapper>
-        <PageHeader />
+        <PageHeader handleAddEProcurement={setEProcurements}/>
       </PageTitleWrapper>
 
       <Grid

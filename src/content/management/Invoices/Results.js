@@ -8,10 +8,8 @@ import {
   Avatar,
   Box,
   Card,
-  Checkbox,
   Grid,
   Slide,
-  Divider,
   Tooltip,
   IconButton,
   Table,
@@ -32,10 +30,11 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import LaunchTwoToneIcon from '@mui/icons-material/LaunchTwoTone';
 import Label from 'src/components/Label';
-import BulkActions from './BulkActions';
 import SearchTwoToneIcon from '@mui/icons-material/SearchTwoTone';
 import DeleteTwoToneIcon from '@mui/icons-material/DeleteTwoTone';
 import { useSnackbar } from 'notistack';
+import useAuth from 'src/hooks/useAuth';
+
 // import { format } from 'date-fns';
 
 const DialogWrapper = styled(Dialog)(
@@ -87,6 +86,10 @@ const getInvoiceStatusLabel = (invoiceStatus) => {
     SERVICE: {
       text: 'SERVICIO',
       color: 'primary'
+    },
+    WORK_CONSULTING: {
+      text: 'CONSULTORÍA DE OBRA',
+      color: 'yellow'
     }
   };
 
@@ -139,8 +142,8 @@ const applyPagination = (eprocurements, page, limit) => {
 };
 
 const Results = ({ eprocurements }) => {
-  console.log(eprocurements)
-  const [selectedItems, setSelectedInvoices] = useState([]);
+  const auth = useAuth();
+  const [selectedItems] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
   const location = useLocation();
 
@@ -157,21 +160,6 @@ const Results = ({ eprocurements }) => {
     setQuery(event.target.value);
   };
 
-  const handleSelectAllInvoices = (event) => {
-    setSelectedInvoices(
-      event.target.checked ? eprocurements.map((eprocurement) => eprocurement.id) : []
-    );
-  };
-
-  const handleSelectOneInvoice = (event, invoiceId) => {
-    if (!selectedItems.includes(invoiceId)) {
-      setSelectedInvoices((prevSelected) => [...prevSelected, invoiceId]);
-    } else {
-      setSelectedInvoices((prevSelected) =>
-        prevSelected.filter((id) => id !== invoiceId)
-      );
-    }
-  };
 
   const handlePageChange = (event, newPage) => {
     setPage(newPage);
@@ -183,10 +171,6 @@ const Results = ({ eprocurements }) => {
 
   const filteredEProcurements = applyFilters(eprocurements, query, filters);
   const paginatedEProcurements = applyPagination(filteredEProcurements, page, limit);
-  const selectedBulkActions = selectedItems.length > 0;
-  const selectedSomeInvoices =
-    selectedItems.length > 0 && selectedItems.length < eprocurements.length;
-  const selectedAllInvoices = selectedItems.length === eprocurements.length;
 
   const [openConfirmDelete, setOpenConfirmDelete] = useState(false);
 
@@ -244,40 +228,6 @@ const Results = ({ eprocurements }) => {
         </Grid>
       </Card>
       <Card>
-        <Box pl={2} display="flex" alignItems="center">
-          <Checkbox
-            checked={selectedAllInvoices}
-            indeterminate={selectedSomeInvoices}
-            onChange={handleSelectAllInvoices}
-          />
-          {selectedBulkActions && (
-            <Box flex={1} p={2}>
-              <BulkActions />
-            </Box>
-          )}
-          {/* {!selectedBulkActions && (
-            <Box
-              flex={1}
-              p={2}
-              display={{ xs: 'block', sm: 'flex' }}
-              alignItems="center"
-              justifyContent="space-between"
-            >
-              <Box/>
-              <TablePagination
-                component="div"
-                labelRowsPerPage={"Filas por página:"}
-                count={filteredEProcurements.length}
-                onPageChange={handlePageChange}
-                onRowsPerPageChange={handleLimitChange}
-                page={page}
-                rowsPerPage={limit}
-                rowsPerPageOptions={[5, 10, 15]}
-              />
-            </Box>
-          )} */}
-        </Box>
-        <Divider />
 
         {paginatedEProcurements.length === 0 ? (
           <Typography
@@ -320,13 +270,6 @@ const Results = ({ eprocurements }) => {
                       >
                         <TableCell>
                           <Box display="flex" alignItems="center">
-                            <Checkbox
-                              checked={isInvoiceSelected}
-                              onChange={(event) =>
-                                handleSelectOneInvoice(event, eprocurement.id)
-                              }
-                              value={isInvoiceSelected}
-                            />
                             <Box pl={1}>
                               <Typography noWrap variant="subtitle2">
                                 {eprocurement.contractingEntityName + " - " + eprocurement.contractingEntityRuc}
@@ -381,14 +324,18 @@ const Results = ({ eprocurements }) => {
                                 <LaunchTwoToneIcon fontSize="small" />
                               </IconButton>
                             </Tooltip>
-                            <Tooltip title="Eliminar" arrow>
-                              <IconButton
-                                onClick={handleConfirmDelete}
-                                color="primary"
-                              >
-                                <DeleteTwoToneIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
+                           {
+                              auth.isAuthenticated && 
+                                              <Tooltip title="Eliminar" arrow>
+                                              <IconButton
+                                                onClick={handleConfirmDelete}
+                                                color="primary"
+                                              >
+                                                <DeleteTwoToneIcon fontSize="small" />
+                                              </IconButton>
+                                              </Tooltip>
+
+                           } 
                           </Typography>
                         </TableCell>
                       </TableRow>

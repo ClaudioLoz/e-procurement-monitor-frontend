@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useAuth from 'src/hooks/useAuth';
-import Login from 'src/content/pages/Auth/Login/Cover';
+import Login from 'src/content/pages/Auth/Login/Basic/index';
 
 const Authenticated = (props) => {
   const { children } = props;
@@ -10,7 +10,7 @@ const Authenticated = (props) => {
   const location = useLocation();
   const [requestedLocation, setRequestedLocation] = useState(null);
 
-  if (!auth.isAuthenticated) {
+  if (!auth.isAuthenticated && !auth.isVisitor) {
     if (location.pathname !== requestedLocation) {
       setRequestedLocation(location.pathname);
     }

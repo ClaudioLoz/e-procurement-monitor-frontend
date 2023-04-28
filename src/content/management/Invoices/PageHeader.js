@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
-import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 
 import {
@@ -37,6 +36,7 @@ import CheckTwoToneIcon from '@mui/icons-material/CheckTwoTone';
 import departmentList from '../../../mocks/departments';
 import provincesJSON from '../../../mocks/provinces';
 import districtsJSON from '../../../mocks/districts';
+import useAuth from 'src/hooks/useAuth';
 
 
 const BoxUploadWrapper = styled(Box)(
@@ -86,12 +86,15 @@ const AvatarDanger = styled(Avatar)(
 
 
 
-function PageHeader() {
-  const { t } = useTranslation();
+function PageHeader({handleAddEProcurement}) {
+  const auth = useAuth();
   const [open, setOpen] = useState(false);
   const [selectedProcurementObject, setSelectedProcurementObject] = useState(null);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [provinces, setProvinces] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState(null);
   const [districts, setDistricts] = useState([]);
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
   const [formData, setFormData] = useState(new FormData());
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
@@ -126,7 +129,8 @@ function PageHeader() {
   const contractObjects = [
     { title: 'BIEN', translation:'GOOD' },
     { title: 'OBRA', translation:'WORK' },
-    { title: 'SERVICIO', translation:'SERVICE' }
+    { title: 'SERVICIO', translation:'SERVICE' },
+    { title: 'CONSULTORÍA DE OBRA', translation:'WORK_CONSULTING' }
   ];
   
   const [contractStartDate, setContractStartDate] = useState(null);
@@ -141,8 +145,8 @@ function PageHeader() {
     setOpen(false);
   };
 
-  const handleCreateInvoiceSuccess = () => {
-    enqueueSnackbar(t('La contratación ha sido publicada en el sistema exitosamente'), {
+  const handleCreateInvoiceSuccess = (newEProcurement) => {
+    enqueueSnackbar('La contratación ha sido publicada en el sistema exitosamente', {
       variant: 'success',
       anchorOrigin: {
         vertical: 'top',
@@ -152,11 +156,14 @@ function PageHeader() {
     });
 
     setOpen(false);
+    handleAddEProcurement(prev =>[...prev,newEProcurement])
+
   };
 
 
   const handleDepartmentChange = (event, value) =>{
     if (value) {
+        setSelectedDepartment(value.nombre_ubigeo);
         setProvinces(provincesJSON[value.id_ubigeo]);
     } else {
       setProvinces([]);
@@ -165,10 +172,16 @@ function PageHeader() {
   };  
   const handleProvinceChange = (event, value) =>{
     if (value) {
+        setSelectedProvince(value.nombre_ubigeo);
         setDistricts(districtsJSON[value.id_ubigeo]);
     } else {
       setDistricts([]);
     }
+  };  
+  const handleDistrictChange = (event, value) =>{
+    if (value) {
+      setSelectedDistrict(value.nombre_ubigeo);
+    } 
   };  
   return (
     <>
@@ -189,6 +202,7 @@ function PageHeader() {
             onClick={handleCreateInvoiceOpen}
             variant="contained"
             startIcon={<AddTwoToneIcon fontSize="small" />}
+            disabled={auth.isVisitor}
           >
             Subir una contratación
           </Button>
@@ -232,6 +246,9 @@ function PageHeader() {
             , contractorRuc: Yup.string()
               .max(255)
               .required("El RUC del contratista es requerido")
+            , contractAmount: Yup.number()
+              .min(1,"El monto del contrato es requerido")
+              .required("El monto del contrato es requerido")
           })}
           onSubmit={async (
             _values,
@@ -245,9 +262,9 @@ function PageHeader() {
                 contractorRuc: _values.contractorRuc,
                 procurementObject: selectedProcurementObject.translation,
                 amount: parseInt(_values.contractAmount),
-                department: "Lima",
-                province: "Lima",
-                district: "Lima",
+                department: selectedDepartment,
+                province: selectedProvince,
+                district: selectedDistrict,
                 contractStartDate,
                 contractEndDate,
                 description: _values.description,
@@ -258,7 +275,7 @@ function PageHeader() {
                 type: 'application/json'
               });
               formData.append("json", blob);
-              await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements`, formData,
+              const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements`, formData,
                     {
                       headers: {
                         "Content-Type": "multipart/form-data",
@@ -268,7 +285,7 @@ function PageHeader() {
               resetForm();
               setStatus({ success: true });
               setSubmitting(false);
-              handleCreateInvoiceSuccess();
+              handleCreateInvoiceSuccess(response.data);
             } catch (err) {
               console.error(err);
               setStatus({ success: false });
@@ -322,6 +339,8 @@ function PageHeader() {
                     sm={8}
                     md={9}
                   >
+                  <Box sx={{ display: "flex" }}>
+
                     <TextField
                       error={Boolean(touched.contractingName && errors.contractingName)}
                       helperText={touched.contractingName && errors.contractingName}
@@ -331,6 +350,7 @@ function PageHeader() {
                       onChange={handleChange}
                       value={values.contractingName}
                       variant="outlined"
+                      sx={{ width: '70%', mr: `1.5rem` }}
                     />
 
                     <TextField
@@ -342,8 +362,11 @@ function PageHeader() {
                       onChange={handleChange}
                       value={values.contractingEntityRuc}
                       variant="outlined"
+                      sx={{ width: '30%' }}
                     />
+                  </Box>
                   </Grid>
+
                   <Grid
                     item
                     xs={12}
@@ -372,6 +395,8 @@ function PageHeader() {
                     sm={8}
                     md={9}
                   >
+                  <Box sx={{ display: "flex" }}>
+
                     <TextField
                       error={Boolean(touched.contractorName && errors.contractorName)}
                       helperText={touched.contractorName && errors.contractorName}
@@ -381,6 +406,7 @@ function PageHeader() {
                       onChange={handleChange}
                       value={values.contractorName}
                       variant="outlined"
+                      sx={{ width: '70%', mr: `1.5rem` }}
                     />
                     <TextField
                       error={Boolean(touched.contractorRuc && errors.contractorRuc)}
@@ -391,7 +417,10 @@ function PageHeader() {
                       onChange={handleChange}
                       value={values.contractorRuc}
                       variant="outlined"
+                      sx={{ width: '30%' }}
+
                     />
+                   </Box>
                   </Grid>
                   <Grid
                     item
@@ -605,6 +634,7 @@ function PageHeader() {
                           m: 0
                         }}
                         limitTags={2}
+                        onChange={handleDistrictChange}
                         getOptionLabel={(option) => option.nombre_ubigeo}
                         options={districts}
                         disabled={districts.length === 0}
@@ -634,7 +664,7 @@ function PageHeader() {
                           }}
                           alignSelf="center"
                         >
-                        <b>Fecha de inicio del contrato:</b>
+                        <b>Fecha de inicio del contrato:*</b>
                       </Box>
                   </Grid>
                   <Grid
@@ -677,7 +707,7 @@ function PageHeader() {
                           }}
                           alignSelf="center"
                         >
-                        <b>Fecha fin del contrato:</b>
+                        <b>Fecha fin del contrato: *</b>
                       </Box>
                   </Grid>
                   <Grid
@@ -719,7 +749,7 @@ function PageHeader() {
                         }}
                         alignSelf="center"
                       >
-                      <b>Documentos:</b>
+                      <b>Documentos: *</b>
                       </Box>
                   </Grid>
                   <Grid

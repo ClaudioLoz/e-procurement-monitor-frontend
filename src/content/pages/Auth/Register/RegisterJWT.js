@@ -45,7 +45,7 @@ function RegisterJWT() {
       })}
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          await register(values.email, values.name, values.password);
+          await register(values.email, values.name, values.nin, values.password);
 
           if (isMountedRef.current) {
             setStatus({ success: true });

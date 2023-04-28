@@ -16,10 +16,13 @@ import {
 } from '@mui/material';
 import useAuth from 'src/hooks/useAuth';
 import useRefMounted from 'src/hooks/useRefMounted';
+import {useNavigate} from 'react-router-dom';
 
 const LoginJWT = () => {
-  const { login } = useAuth();
+  const { login, visitorLogin} = useAuth();
   const isMountedRef = useRefMounted();
+  const navigate = useNavigate();
+
 
   return (
     <> <Formik
@@ -50,6 +53,8 @@ const LoginJWT = () => {
             setStatus({ success: true });
             setSubmitting(false);
           }
+          console.log("hello?");
+          navigate(`/contrataciones-seguimiento`);
         } catch (err) {
           console.error(err);
           if (isMountedRef.current) {
@@ -160,6 +165,7 @@ const LoginJWT = () => {
             fullWidth
             size="large"
             variant="contained"
+            onClick={async() => visitorLogin()}
           >
             Ingresar como visitante
           </Button>

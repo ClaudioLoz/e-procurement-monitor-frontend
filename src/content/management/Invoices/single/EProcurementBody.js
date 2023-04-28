@@ -65,6 +65,10 @@ const map = {
   SERVICE: {
     text: 'SERVICIO',
     color: 'primary'
+  },
+  WORK_CONSULTING: {
+    text: 'CONSULTORÍA DE OBRA',
+    color: 'yellow'
   }
 };
 
