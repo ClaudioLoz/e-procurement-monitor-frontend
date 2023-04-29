@@ -20,7 +20,6 @@ function ManagementInvoicesView() {
   const getEProcurement = useCallback(async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements/${eProcurementId}`);
-      console.log(response)
       if (isMountedRef.current) {
         setEProcurement(response.data);
       }

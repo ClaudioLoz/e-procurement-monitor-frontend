@@ -17,6 +17,8 @@ import { useState } from 'react';
 
 import axios from 'axios';
 
+const options = { day: '2-digit', month: '2-digit', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric', hour12:true };
+
 const MessageInputWrapper = styled(InputBase)(
   ({ theme }) => `
     font-size: ${theme.typography.pxToRem(18)};
@@ -87,7 +89,8 @@ function BottomBarContent({eProcurementId, setComments}) {
       },
     });
     console.log(response)
-    setComments(prev => [...prev, response.data]);
+    response.data.date = new Date(response.data.createdDate).toLocaleString( 'es-PE', options);
+    setComments(prev => [...prev, response.data, ]);
     handleClear();
   };
 
@@ -109,6 +112,12 @@ function BottomBarContent({eProcurementId, setComments}) {
           value={inputValue}
           onChange={handleInputChange}
           disabled={inputDisabled || !auth.isAuthenticated}
+          onKeyPress={(event) => {
+            console.log(event)
+            if (event.key === "Enter") {
+              handleSubmit();
+            }
+          }}
         />
       </Tooltip>
       </Box>

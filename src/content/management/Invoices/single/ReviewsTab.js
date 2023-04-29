@@ -11,7 +11,6 @@ import {
 // import axios from 'axios';
 
 
-const names = ["Eduardo Torres", "Luis Flores", "Juan Rodriguez", "Marcelo Hurtado"];
 function ReviewsTab({comments}) {
 
   return (
@@ -60,7 +59,7 @@ function ReviewsTab({comments}) {
                       }}
                       variant="h5"
                     >
-                       {names[Math.floor(Math.random() * names.length)]}
+                       {comment.authUserName}
                     </Typography>
                   </Box>
                   <Box flex={1}>

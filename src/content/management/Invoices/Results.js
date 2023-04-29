@@ -325,7 +325,7 @@ const Results = ({ eprocurements }) => {
                               </IconButton>
                             </Tooltip>
                            {
-                              auth.isAuthenticated && 
+                              auth.isAuthenticated && auth.user.username === eprocurement.username &&
                                               <Tooltip title="Eliminar" arrow>
                                               <IconButton
                                                 onClick={handleConfirmDelete}
