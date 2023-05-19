@@ -68,11 +68,12 @@
     "swiper": "8.2.2",
     "uuid": "8.3.2",
     "web-vitals": "2.1.4",
+    "web3": "^1.10.0",
     "yup": "0.32.11"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start":  "craco start",
+    "build": "craco build",
     "eject": "react-scripts eject",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ./src",
@@ -104,6 +105,7 @@
   "devDependencies": {
     "@babel/core": "7.18.2",
     "@babel/eslint-parser": "7.18.2",
+    "@craco/craco": "^7.1.0",
     "eslint": "8.17.0",
     "eslint-config-airbnb": "19.0.4",
     "eslint-config-prettier": "8.5.0",

@@ -8,16 +8,20 @@ import {
   // Typography,
   // FormControlLabel,
   // Link,
+  Zoom,
   CircularProgress
 } from '@mui/material';
 import useAuth from 'src/hooks/useAuth';
 import useRefMounted from 'src/hooks/useRefMounted';
 import { useTranslation } from 'react-i18next';
+import { useSnackbar } from 'notistack';
 
 function RegisterJWT() {
   const { register } = useAuth();
   const isMountedRef = useRefMounted();
   const { t } = useTranslation();
+  const { enqueueSnackbar } = useSnackbar();
+
 
   return (
     <Formik
@@ -51,6 +55,15 @@ function RegisterJWT() {
             setStatus({ success: true });
             setSubmitting(false);
           }
+
+          enqueueSnackbar('Se ha creado su usuario en el sistema exitosamente', {
+            variant: 'success',
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'right'
+            },
+            TransitionComponent: Zoom
+          });
         } catch (err) {
           console.error(err);
           setStatus({ success: false });

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import * as Yup from 'yup';
 import { Formik } from 'formik';
 import axios from 'axios';
@@ -37,6 +37,7 @@ import departmentList from '../../../mocks/departments';
 import provincesJSON from '../../../mocks/provinces';
 import districtsJSON from '../../../mocks/districts';
 import useAuth from 'src/hooks/useAuth';
+import Web3 from 'web3';
 
 
 const BoxUploadWrapper = styled(Box)(
@@ -85,10 +86,164 @@ const AvatarDanger = styled(Avatar)(
 );
 
 
+const web3 = new Web3(window.ethereum);
+const ABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_idProcurementDocument",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_idProcurement",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_procurementDocument",
+				"type": "string"
+			}
+		],
+		"name": "addProcurementDocument",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "idProcurement",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "encryptedProcurementDocument",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "valid",
+				"type": "bool"
+			}
+		],
+		"name": "ProcurementDocumentAdded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "valid",
+				"type": "bool"
+			}
+		],
+		"name": "ProcurementDocumentRemoved",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_idProcurementDocument",
+				"type": "uint256"
+			}
+		],
+		"name": "removeProcurementDocument",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "documents",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "id",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "idProcurement",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "encryptedProcurementDocument",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "valid",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+const contractAddress = "0xA4376fe6461e0110332edb473FeA183536e6ad90"
 
 function PageHeader({handleAddEProcurement}) {
   const auth = useAuth();
   const [open, setOpen] = useState(false);
+  const [accounts,setAccounts] = useState([]);
   const [selectedProcurementObject, setSelectedProcurementObject] = useState(null);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [provinces, setProvinces] = useState([]);
@@ -98,7 +253,19 @@ function PageHeader({handleAddEProcurement}) {
   const [formData, setFormData] = useState(new FormData());
   const { enqueueSnackbar } = useSnackbar();
   const theme = useTheme();
+  useEffect(() => {
+    async function getAccounts() {
+      try {
+        // const web3 = new Web3(Web3.givenProvider);
+        // await window.ethereum.request({ method: 'eth_requestAccounts' });
+        setAccounts(await web3.eth.getAccounts());
+      } catch (err) {
+        console.error(err);
+      }
+    }
 
+    getAccounts();
+  }, []);
   const onDrop = (acceptedFiles) => {
     const auxFormData = new FormData();
     acceptedFiles.forEach((file) => {
@@ -145,18 +312,42 @@ function PageHeader({handleAddEProcurement}) {
     setOpen(false);
   };
 
-  const handleCreateInvoiceSuccess = (newEProcurement) => {
-    enqueueSnackbar('La contratación ha sido publicada en el sistema exitosamente', {
-      variant: 'success',
-      anchorOrigin: {
-        vertical: 'top',
-        horizontal: 'right'
-      },
-      TransitionComponent: Zoom
-    });
+  const handleCreateInvoiceSuccess = async(newEProcurement) => {
+    const contract = new web3.eth.Contract(ABI, contractAddress);
+    
+    const idProcurement = newEProcurement.eprocurement.id;
+    console.log(accounts)
 
-    setOpen(false);
-    handleAddEProcurement(prev =>[...prev,newEProcurement])
+    const promises = [];
+    /* eslint-disable no-restricted-syntax */
+    for (let [key, value] of Object.entries(newEProcurement.encryptedFiles)) {
+      const idProcurementDocument = key;
+      const encryptedProcurementDocument = value;
+      
+      const promise = contract.methods.addProcurementDocument(idProcurementDocument, idProcurement, encryptedProcurementDocument)
+            .send({ from: accounts[0] })
+      
+      promises.push(promise);
+    }
+    /* eslint-enable no-restricted-syntax */
+
+    Promise.all(promises)
+    .then((receipts) => {
+      console.log('Transaction receipts:', receipts);
+      setOpen(false);
+      handleAddEProcurement(prev =>[...prev, newEProcurement.eprocurement]);
+      enqueueSnackbar('La contratación ha sido publicada en el sistema exitosamente', {
+        variant: 'success',
+        anchorOrigin: {
+          vertical: 'top',
+          horizontal: 'right'
+        },
+        TransitionComponent: Zoom
+      });
+    })
+    .catch((error) => {
+      console.error('Error sending transaction:', error);
+    });
 
   };
 

@@ -7,7 +7,7 @@ import {
   styled,
   useTheme
 } from '@mui/material';
-import PowerSettingsNewTwoToneIcon from '@mui/icons-material/PowerSettingsNewTwoTone';
+import LockOpenTwoToneIcon from '@mui/icons-material/LockOpenTwoTone';
 import { useNavigate } from 'react-router-dom';
 import useAuth from 'src/hooks/useAuth';
 
@@ -63,7 +63,7 @@ function SidebarFooter() {
           }}
           onClick={handleLogout}
         >
-          <PowerSettingsNewTwoToneIcon fontSize="small" />
+          <LockOpenTwoToneIcon fontSize="small" />
         </IconButton>
       </LightTooltip>
     </Box>

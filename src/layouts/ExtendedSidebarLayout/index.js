@@ -2,7 +2,7 @@ import { Box, alpha, lighten, useTheme } from '@mui/material';
 import { Outlet } from 'react-router-dom';
 
 import Sidebar from './Sidebar';
-// import Header from './Header';
+import Header from './Header';
 
 const ExtendedSidebarLayout = () => {
   const theme = useTheme();
@@ -35,7 +35,7 @@ const ExtendedSidebarLayout = () => {
         }
       }}
     >
-      {/* <Header /> */}
+      <Header />
       <Sidebar />
       <Box
         sx={{

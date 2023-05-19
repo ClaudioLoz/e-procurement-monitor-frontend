@@ -175,7 +175,7 @@ const EProcurementBody = ({ eProcurement }) => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {eProcurement.fileInfoOutDTOList.map((item, index) => (
+                        {eProcurement.fileInfoOutDTOList?.map((item, index) => (
                           <TableRow key={index}>
                             <TableCell>
                               <Typography noWrap>{item.name}</Typography>

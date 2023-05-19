@@ -5,6 +5,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 import {
   // Box,
+  Zoom,
   Button,
   FormHelperText,
   TextField,
@@ -15,6 +16,7 @@ import {
   CircularProgress
 } from '@mui/material';
 import useAuth from 'src/hooks/useAuth';
+import { useSnackbar } from 'notistack';
 import useRefMounted from 'src/hooks/useRefMounted';
 import {useNavigate} from 'react-router-dom';
 
@@ -22,6 +24,8 @@ const LoginJWT = () => {
   const { login, visitorLogin} = useAuth();
   const isMountedRef = useRefMounted();
   const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
+
 
 
   return (
@@ -57,6 +61,14 @@ const LoginJWT = () => {
           navigate(`/contrataciones-seguimiento`);
         } catch (err) {
           console.error(err);
+          enqueueSnackbar('Credenciales incorrectas', {
+            variant: 'error',
+            anchorOrigin: {
+              vertical: 'top',
+              horizontal: 'right'
+            },
+            TransitionComponent: Zoom
+          });
           if (isMountedRef.current) {
             setStatus({ success: false });
             setErrors({ submit: err.message });
