@@ -15,9 +15,9 @@ const menuItems = [
         link: '/contrataciones-seguimiento/lista',
       },
       {
-        name: 'Contrataciones a evaluar',
+        name: 'Contrataciones finalizadas',
         icon: ThumbsUpDownIcon,
-        link: '/contrataciones-evaluacion/lista',
+        link: '/contrataciones-finalizadas/lista',
       }
     ]
   },

@@ -8,7 +8,7 @@ import {
   Grid,
   Divider,
   Container,
-  // Tooltip,
+  Rating,
   Button,
   Table,
   Tabs,
@@ -21,6 +21,7 @@ import {
   styled
 } from '@mui/material';
 // import useAuth from 'src/hooks/useAuth';
+import SalesByCategory from '../../../dashboards/Commerce/SalesByCategory';
 import DownloadTwoToneIcon from '@mui/icons-material/DownloadTwoTone';
 import numeral from 'numeral';
 import axios from 'axios';
@@ -28,7 +29,7 @@ import useRefMounted from 'src/hooks/useRefMounted';
 
 import ReviewsTab from './ReviewsTab';
 import AdditionalInfoTab from './AdditionalInfoTab';
-import BottomBarContent from './BottomBarContent';
+// import BottomBarContent from './BottomBarContent';
 
 const TabsContainerWrapper = styled(Box)(
   ({ theme }) => `
@@ -101,8 +102,10 @@ const EProcurementBody = ({ eProcurement }) => {
   }, [getComments]);
 
   const tabs = [
+    { value: 'rating_justifications', label: "Justificaciones"},
+    { value: 'suggestions', label: "Sugerencias"},
     { value: 'reviews', label: "Comentarios" },
-    { value: 'additional_info', label: "Información adicional"}
+    { value: 'additional_info', label: "Información adicional"},
   ];
   const handleTabsChange = (_event, value) => {
     setCurrentTab(value);
@@ -226,16 +229,20 @@ const EProcurementBody = ({ eProcurement }) => {
             </Tabs>
           </TabsContainerWrapper>
           <Divider />
+          {currentTab === 'rating_justifications' && <ReviewsTab comments={comments} stringg="justificaciones de las calificaciones recibidas"/>}
+          {currentTab === 'suggestions' && <ReviewsTab comments={comments} stringg="sugerencias"/>}
           {currentTab === 'reviews' && <ReviewsTab comments={comments}/>}
           {currentTab === 'additional_info' && <AdditionalInfoTab description={eProcurement.eprocurement.description}/>}
-          <BottomBarContent setComments={setComments} eProcurementId={eProcurement.eprocurement.id}/>
+          {/* <BottomBarContent setComments={setComments} eProcurementId={eProcurement.eprocurement.id}/> */}
+          {"Califica a la contratación"} <br/><Rating size="large" defaultValue={2} precision={1} />
+          <SalesByCategory />
         </Card>
       </Grid>
     </Container>
   );
 };
 
-EProcurementBody.propTypes = {
+  EProcurementBody.propTypes = {
   eProcurement: PropTypes.object.isRequired
 };
 

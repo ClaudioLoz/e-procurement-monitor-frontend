@@ -2,28 +2,14 @@ import {
   Card,
   CardContent,
   CardHeader,
-  Typography,
   Grid,
   Divider,
-  Box,
   useTheme,
-  styled
 } from '@mui/material';
-import { useTranslation } from 'react-i18next';
 import Chart from 'react-apexcharts';
 
-const DotLegend = styled('span')(
-  ({ theme }) => `
-    border-radius: 22px;
-    width: ${theme.spacing(1.5)};
-    height: ${theme.spacing(1.5)};
-    display: inline-block;
-    margin-right: ${theme.spacing(0.5)};
-`
-);
 
 function SalesByCategory() {
-  const { t } = useTranslation();
   const theme = useTheme();
 
   const sales = {
@@ -31,13 +17,15 @@ function SalesByCategory() {
       {
         backgroundColor: [
           theme.palette.primary.main,
+          theme.palette.secondary,
           theme.palette.success.main,
           theme.palette.warning.main,
-          theme.palette.info.main
+          theme.palette.info.main,
+
         ]
       }
     ],
-    labels: [t('Electronics'), t('Furniture'), t('Fashion'), t('Home & Decor')]
+    labels: ["1 estrella", "2 estrellas", "3 estrellas", "4 estrellas", "5 estrellas"]
   };
 
   const chartOptions = {
@@ -93,11 +81,11 @@ function SalesByCategory() {
     }
   };
 
-  const chartSeries = [15, 45, 25, 15];
+  const chartSeries = [15, 45, 25, 10, 5];
 
   return (
     <Card>
-      <CardHeader title={t('Sales by Category')} />
+      <CardHeader title="Resultados totales hasta el momento" />
       <Divider />
       <CardContent>
         <Grid container spacing={3}>
@@ -115,37 +103,7 @@ function SalesByCategory() {
               type="donut"
             />
           </Grid>
-          <Grid md={6} item display="flex" alignItems="center">
-            <Box>
-              {sales.labels.map((label, i) => (
-                <Typography
-                  key={label}
-                  variant="body2"
-                  sx={{
-                    py: 0.8,
-                    display: 'flex',
-                    alignItems: 'center',
-                    mr: 2
-                  }}
-                >
-                  <DotLegend
-                    style={{
-                      background: `${sales.datasets[0].backgroundColor[i]}`
-                    }}
-                  />
-                  <span
-                    style={{
-                      paddingRight: 10,
-                      color: `${sales.datasets[0].backgroundColor[i]}`
-                    }}
-                  >
-                    {chartSeries[i]}%
-                  </span>
-                  {label}
-                </Typography>
-              ))}
-            </Box>
-          </Grid>
+          
         </Grid>
       </CardContent>
     </Card>

@@ -5,8 +5,8 @@ import ExtendedSidebarLayout from 'src/layouts/ExtendedSidebarLayout';
 
 
 import accountRoutes from './account';
-import managementRoutes from './management';
 import monitoredProcurementRoutes from './monitoredProcurement';
+import completedProcurementRoutes from './completedProcurement';
 
 
 
@@ -33,8 +33,8 @@ const router = [
         children: monitoredProcurementRoutes
       },
       {
-        path: 'contrataciones-evaluacion',
-        children: managementRoutes
+        path: 'contrataciones-finalizadas',
+        children: completedProcurementRoutes
       }
     ]
   }

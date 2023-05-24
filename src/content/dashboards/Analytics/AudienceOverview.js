@@ -1,159 +1,120 @@
-import { useRef, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useRef, useState, useCallback, useEffect } from 'react';
 import ExpandMoreTwoToneIcon from '@mui/icons-material/ExpandMoreTwoTone';
 
 import {
   Button,
   Card,
   Box,
+  Typography,
   CardContent,
   CardHeader,
   Menu,
   MenuItem,
-  CardActions,
-  Grid,
-  Typography,
+  Container,
   Divider,
-  styled,
   useTheme
 } from '@mui/material';
 
+import { useParams } from 'react-router-dom';
+import useRefMounted from 'src/hooks/useRefMounted';
+import axios from 'axios';
+import numeral from 'numeral';
+
+
 import Chart from 'react-apexcharts';
 
-const CardActionsWrapper = styled(CardActions)(
-  ({ theme }) => `
-      background-color: ${theme.colors.alpha.black[5]};
-      padding: 0;
-      display: block;
-`
-);
+const typographySx = {
+  whiteSpace: 'nowrap',
+  mb: 2
+};
+const map = {
+  WORK: {
+    text: 'OBRA',
+    color: 'warning'
+  },
+  GOOD: {
+    text: 'BIEN',
+    color: 'info'
+  },
+  SERVICE: {
+    text: 'SERVICIO',
+    color: 'primary'
+  },
+  WORK_CONSULTING: {
+    text: 'CONSULTORÍA DE OBRA',
+    color: 'yellow'
+  }
+};
+const months =  [
+  'Enero',
+  'Febrero',
+  'Marzo',
+  'Abril',
+  'Mayo',
+  'Junio',
+  'Julio',
+  'Agosto',
+  'Setiembre',
+  'Octubre',
+  'Noviembre',
+  'Diciembre'
+]
+
+
+const periods = [
+  {
+    value: 'today',
+    text: '2022'
+  },
+  {
+    value: 'yesterday',
+    text: '2021'
+  }
+];
+const metrics = [
+  {
+    value: 'ratingAverage',
+    text: 'Promedio de calificación'
+  }
+];
+
 
 function AudienceOverview() {
-  const { t } = useTranslation();
 
-  const periods = [
-    {
-      value: 'today',
-      text: t('Today')
-    },
-    {
-      value: 'yesterday',
-      text: t('Yesterday')
-    },
-    {
-      value: 'last_month',
-      text: t('Last month')
-    },
-    {
-      value: 'last_year',
-      text: t('Last year')
-    }
-  ];
-  const audiences = [
-    {
-      value: 'users',
-      text: t('Users')
-    },
-    {
-      value: 'new_users',
-      text: t('New users')
-    },
-    {
-      value: 'page_views',
-      text: t('Page views')
-    },
-    {
-      value: 'avg_session_duration',
-      text: t('Avg. session duration')
-    },
-    {
-      value: 'bounce_rate',
-      text: t('Bounce rate')
-    },
-    {
-      value: 'sessions',
-      text: t('Sessions')
-    }
-  ];
+  const isMountedRef = useRefMounted();
+  const [eProcurement, setEProcurement] = useState(null);
+
+  const { eProcurementId } = useParams();
+
 
   const actionRef1 = useRef(null);
   const actionRef2 = useRef(null);
   const [openPeriod, setOpenMenuPeriod] = useState(false);
   const [openAudience, setOpenMenuAudience] = useState(false);
-  const [period, setPeriod] = useState(periods[3].text);
-  const [audience, setAudience] = useState(audiences[1].text);
+  const [period, setPeriod] = useState(periods[0].text);
+  const [metric, setMetric] = useState(metrics[0].text);
   const theme = useTheme();
 
-  const ChartSparklineOptions = {
-    chart: {
-      background: 'transparent',
-      toolbar: {
-        show: false
-      },
-      sparkline: {
-        enabled: true
-      },
-      zoom: {
-        enabled: false
+
+  const getEProcurement = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/eprocurements/${eProcurementId}?isDetailed=false`);
+      if (isMountedRef.current) {
+        setEProcurement(response.data);
       }
-    },
-    colors: [theme.colors.primary.main],
-    dataLabels: {
-      enabled: false
-    },
-    theme: {
-      mode: theme.palette.mode
-    },
-    fill: {
-      opacity: 1,
-      colors: [theme.colors.primary.main],
-      type: 'solid'
-    },
-    grid: {
-      padding: {
-        top: 2
-      }
-    },
-    stroke: {
-      show: true,
-      colors: [theme.colors.primary.main],
-      width: 2
-    },
-    legend: {
-      show: false
-    },
-    labels: [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ],
-    tooltip: {
-      enabled: false
-    },
-    xaxis: {
-      labels: {
-        show: false
-      },
-      axisBorder: {
-        show: false
-      },
-      axisTicks: {
-        show: false
-      }
-    },
-    yaxis: {
-      show: false
+    } catch (err) {
+      console.error(err);
     }
-  };
+  }, [eProcurementId, isMountedRef]);
+
+  useEffect(() => {
+    getEProcurement();
+  }, [getEProcurement]);
+  
+  if (!eProcurement) {
+    return null;
+  }
+
 
   const ChartAudienceOptions = {
     chart: {
@@ -166,20 +127,7 @@ function AudienceOverview() {
       }
     },
     colors: [theme.colors.primary.main],
-    labels: [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec'
-    ],
+    labels: months,
     dataLabels: {
       enabled: false
     },
@@ -251,18 +199,70 @@ function AudienceOverview() {
     }
   };
 
-  const data = {
-    users: 14.586,
-    newUsers: 12.847,
-    pageViews: 67.492,
-    avgSessionDuration: '00:05:21',
-    bounceRate: '65.37%',
-    sessions: 25.694
-  };
+  // const data = {
+  //   users: 14.586,
+  //   newUsers: 12.847,
+  //   pageViews: 67.492,
+  //   avgSessionDuration: '00:05:21',
+  //   bounceRate: '65.37%',
+  //   sessions: 25.694
+  // };
 
   return (
     <Card>
-      <CardHeader
+
+
+    <Container maxWidth="lg">
+          <Card
+            sx={{
+              p: 3,
+              mb: 3
+            }}
+          >
+            <Box
+              display="flex"
+              alignItems="flex-start"
+              justifyContent="space-between"
+            >
+              <Box >
+                  <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Entidad contratante: {`${eProcurement.eprocurement.contractingEntityName} - ${eProcurement.eprocurement.contractingEntityRuc}`}
+                </Typography>
+                <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Contratista: {`${eProcurement.eprocurement.contractorName} - ${eProcurement.eprocurement.contractorRuc}`}
+                </Typography>
+                <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Objeto de contratación: {map[eProcurement.eprocurement.procurementObject].text}
+                </Typography>
+                <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Monto:  S/. {numeral(eProcurement.eprocurement.amount).format('0,0')}
+                </Typography>
+                <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Departamento: {eProcurement.eprocurement.department}
+                </Typography>
+                {eProcurement.eprocurement.province && <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Provincia: {eProcurement.eprocurement.province}
+                </Typography>}
+                {
+                  eProcurement.eprocurement.district && 
+                  <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Distrito: {eProcurement.eprocurement.district}
+                </Typography>
+                }
+ 
+                <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Fecha de inicio del contrato: {eProcurement.eprocurement.contractStartDate[2]}/
+                  {eProcurement.eprocurement.contractStartDate[1]}/{eProcurement.eprocurement.contractStartDate[0]}
+                </Typography>
+                <Typography variant="h4" gutterBottom sx={typographySx}>
+                  Fecha fin del contrato:  {eProcurement.eprocurement.contractEndDate[2]}/
+                  {eProcurement.eprocurement.contractEndDate[1]}/{eProcurement.eprocurement.contractEndDate[0]}
+                </Typography>
+                    </Box>
+                  </Box>
+                </Card>
+        </Container>
+        <CardHeader
         action={
           <>
             <Button
@@ -302,9 +302,10 @@ function AudienceOverview() {
             </Menu>
           </>
         }
-        title={t('Audience Overview')}
+        title="Indicadores cuantitativos de la contratación seleccionada"
       />
       <Divider />
+
       <CardContent>
         <Button
           size="small"
@@ -313,7 +314,7 @@ function AudienceOverview() {
           onClick={() => setOpenMenuAudience(true)}
           endIcon={<ExpandMoreTwoToneIcon fontSize="small" />}
         >
-          {audience}
+          {metric}
         </Button>
         <Menu
           disableScrollLock
@@ -329,11 +330,11 @@ function AudienceOverview() {
             horizontal: 'left'
           }}
         >
-          {audiences.map((_audience) => (
+          {metrics.map((_audience) => (
             <MenuItem
               key={_audience.value}
               onClick={() => {
-                setAudience(_audience.text);
+                setMetric(_audience.text);
                 setOpenMenuAudience(false);
               }}
             >
@@ -346,9 +347,9 @@ function AudienceOverview() {
             options={ChartAudienceOptions}
             series={[
               {
-                name: 'New Users',
+                name: 'Promedio calificación',
                 data: [
-                  324, 315, 578, 576, 227, 459, 473, 282, 214, 623, 477, 401
+                  1, 2.5, 3.5, 3, 3.2, 4, 3, 3.2, 3.3, 2.9, 3.5, 3.4
                 ]
               }
             ]}
@@ -357,290 +358,7 @@ function AudienceOverview() {
           />
         </Box>
       </CardContent>
-      <Divider />
-      <CardActionsWrapper>
-        <Box>
-          <Grid container alignItems="center">
-            <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              item
-              sx={{
-                position: 'relative'
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  display: { xs: 'none', sm: 'inline-block' }
-                }}
-              >
-                <Divider orientation="vertical" flexItem absolute />
-              </Box>
-              <Box
-                sx={{
-                  p: 3
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('Users')}
-                  </Typography>
-                  <Typography variant="h3">{data.users}</Typography>
-                </Box>
-
-                <Chart
-                  options={ChartSparklineOptions}
-                  series={[
-                    {
-                      name: 'Users',
-                      data: [
-                        467, 696, 495, 477, 422, 585, 691, 294, 508, 304, 499,
-                        390
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={55}
-                />
-              </Box>
-              <Divider />
-            </Grid>
-            <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              item
-              sx={{
-                position: 'relative'
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  display: { xs: 'none', sm: 'inline-block' }
-                }}
-              >
-                <Divider orientation="vertical" flexItem absolute />
-              </Box>
-              <Box
-                sx={{
-                  p: 3
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('New Users')}
-                  </Typography>
-                  <Typography variant="h3">{data.newUsers}</Typography>
-                </Box>
-                <Chart
-                  options={ChartSparklineOptions}
-                  series={[
-                    {
-                      name: 'New Users',
-                      data: [
-                        581, 203, 462, 518, 329, 395, 375, 447, 303, 423, 405,
-                        589
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={55}
-                />
-              </Box>
-              <Divider />
-            </Grid>
-            <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              item
-              sx={{
-                position: 'relative'
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  display: { xs: 'none', sm: 'inline-block' }
-                }}
-              >
-                <Divider orientation="vertical" flexItem absolute />
-              </Box>
-              <Box
-                sx={{
-                  p: 3
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('Page Views')}
-                  </Typography>
-                  <Typography variant="h3">{data.pageViews}</Typography>
-                </Box>
-
-                <Chart
-                  options={ChartSparklineOptions}
-                  series={[
-                    {
-                      name: 'Page Views',
-                      data: [
-                        353, 380, 325, 246, 682, 605, 672, 271, 386, 630, 577,
-                        511
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={55}
-                />
-              </Box>
-              <Divider />
-            </Grid>
-            <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              item
-              sx={{
-                position: 'relative'
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  display: { xs: 'none', sm: 'inline-block' }
-                }}
-              >
-                <Divider orientation="vertical" flexItem absolute />
-              </Box>
-              <Box
-                sx={{
-                  p: 3
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('Avg. Session Duration')}
-                  </Typography>
-                  <Typography variant="h3">
-                    {data.avgSessionDuration}
-                  </Typography>
-                </Box>
-
-                <Chart
-                  options={ChartSparklineOptions}
-                  series={[
-                    {
-                      name: 'Avg. Session Duration',
-                      data: [
-                        508, 420, 336, 278, 627, 475, 575, 307, 441, 249, 413,
-                        574
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={55}
-                />
-              </Box>
-              <Divider />
-            </Grid>
-            <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              item
-              sx={{
-                position: 'relative'
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  display: { xs: 'none', sm: 'inline-block' }
-                }}
-              >
-                <Divider orientation="vertical" flexItem absolute />
-              </Box>
-              <Box
-                sx={{
-                  p: 3
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('Bounce Rate')}
-                  </Typography>
-                  <Typography variant="h3">{data.bounceRate}</Typography>
-                </Box>
-
-                <Chart
-                  options={ChartSparklineOptions}
-                  series={[
-                    {
-                      name: 'Bounce Rate',
-                      data: [
-                        534, 345, 622, 332, 567, 250, 494, 270, 313, 470, 329,
-                        287
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={55}
-                />
-              </Box>
-              <Divider />
-            </Grid>
-            <Grid
-              xs={12}
-              sm={6}
-              md={4}
-              item
-              sx={{
-                position: 'relative'
-              }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  display: { xs: 'none', sm: 'inline-block' }
-                }}
-              >
-                <Divider orientation="vertical" flexItem absolute />
-              </Box>
-              <Box
-                sx={{
-                  p: 3
-                }}
-              >
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>
-                    {t('Sessions')}
-                  </Typography>
-                  <Typography variant="h3">{data.sessions}</Typography>
-                </Box>
-
-                <Chart
-                  options={ChartSparklineOptions}
-                  series={[
-                    {
-                      name: 'Sessions',
-                      data: [
-                        610, 234, 374, 423, 207, 507, 699, 304, 285, 257, 350,
-                        227
-                      ]
-                    }
-                  ]}
-                  type="line"
-                  height={55}
-                />
-              </Box>
-              <Divider />
-            </Grid>
-          </Grid>
-        </Box>
-      </CardActionsWrapper>
+  
     </Card>
   );
 }
