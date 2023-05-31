@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from 'react';
 import ExpandMoreTwoToneIcon from '@mui/icons-material/ExpandMoreTwoTone';
 
 import {
+  Rating,
   Button,
   Card,
   Box,
@@ -61,16 +62,7 @@ const months =  [
 ]
 
 
-const periods = [
-  {
-    value: 'today',
-    text: '2022'
-  },
-  {
-    value: 'yesterday',
-    text: '2021'
-  }
-];
+
 const metrics = [
   {
     value: 'ratingAverage',
@@ -78,20 +70,21 @@ const metrics = [
   }
 ];
 
+const AFTER_YEARS = 1;
 
 function AudienceOverview() {
 
   const isMountedRef = useRefMounted();
   const [eProcurement, setEProcurement] = useState(null);
-
+  const [averages, setAverages] = useState([]);
   const { eProcurementId } = useParams();
-
-
   const actionRef1 = useRef(null);
   const actionRef2 = useRef(null);
   const [openPeriod, setOpenMenuPeriod] = useState(false);
   const [openAudience, setOpenMenuAudience] = useState(false);
-  const [period, setPeriod] = useState(periods[0].text);
+  const [periods, setPeriods] = useState([]);
+  const [period, setPeriod] = useState(null);
+  const [periodValue, setPeriodValue] = useState(null);
   const [metric, setMetric] = useState(metrics[0].text);
   const theme = useTheme();
 
@@ -102,19 +95,55 @@ function AudienceOverview() {
       if (isMountedRef.current) {
         setEProcurement(response.data);
       }
+      setPeriod((response.data.eprocurement.contractEndDate[0] + AFTER_YEARS).toString());
+      setPeriodValue(response.data.eprocurement.contractEndDate[0] + AFTER_YEARS);
+      setPeriods([
+        {
+          text: (response.data.eprocurement.contractEndDate[0] + AFTER_YEARS).toString(), 
+          value: response.data.eprocurement.contractEndDate[0] + AFTER_YEARS
+        }, 
+        {
+          text: response.data.eprocurement.contractEndDate[0].toString(),
+          value: response.data.eprocurement.contractEndDate[0]
+        },
+        {
+          text:response.data.eprocurement.contractStartDate[0].toString(),
+          value:response.data.eprocurement.contractStartDate[0],
+        }]);
     } catch (err) {
       console.error(err);
     }
   }, [eProcurementId, isMountedRef]);
 
+  const getRatingAverages = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/ratings/averages`,
+      {
+        params:{
+          eProcurementId,
+          year:periodValue
+        }
+      });
+
+      if (isMountedRef.current) {
+        setAverages(response.data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [eProcurementId, periodValue, isMountedRef]);
+
   useEffect(() => {
     getEProcurement();
-  }, [getEProcurement]);
+  }, []);
+  
+  useEffect(() => {
+    getRatingAverages();
+  }, [periodValue]);
   
   if (!eProcurement) {
     return null;
   }
-
 
   const ChartAudienceOptions = {
     chart: {
@@ -127,7 +156,7 @@ function AudienceOverview() {
       }
     },
     colors: [theme.colors.primary.main],
-    labels: months,
+    labels: averages.length>0? averages.map((a) => months[a.month-1]): months,
     dataLabels: {
       enabled: false
     },
@@ -210,8 +239,6 @@ function AudienceOverview() {
 
   return (
     <Card>
-
-
     <Container maxWidth="lg">
           <Card
             sx={{
@@ -258,6 +285,11 @@ function AudienceOverview() {
                   Fecha fin del contrato:  {eProcurement.eprocurement.contractEndDate[2]}/
                   {eProcurement.eprocurement.contractEndDate[1]}/{eProcurement.eprocurement.contractEndDate[0]}
                 </Typography>
+                <Typography variant="h3=">
+                          Promedio de calificación total actual:
+                          {` ${eProcurement.totalRatingAverage.toFixed(2)}`} 
+                          <Rating size="medium" readOnly value={1} max={1}/>
+                </Typography>
                     </Box>
                   </Box>
                 </Card>
@@ -293,6 +325,7 @@ function AudienceOverview() {
                   key={_period.value}
                   onClick={() => {
                     setPeriod(_period.text);
+                    setPeriodValue(_period.value);
                     setOpenMenuPeriod(false);
                   }}
                 >
@@ -348,9 +381,7 @@ function AudienceOverview() {
             series={[
               {
                 name: 'Promedio calificación',
-                data: [
-                  1, 2.5, 3.5, 3, 3.2, 4, 3, 3.2, 3.3, 2.9, 3.5, 3.4
-                ]
+                data: averages.map(obj=>obj.average)
               }
             ]}
             type="line"

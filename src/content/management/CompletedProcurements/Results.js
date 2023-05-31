@@ -5,6 +5,7 @@ import { Link as RouterLink, useLocation } from 'react-router-dom';
 import numeral from 'numeral';
 
 import {
+  Rating,
   Box,
   Card,
   Grid,
@@ -183,7 +184,7 @@ const Results = ({ eprocurements }) => {
                     <TableCell >Objeto de contratación</TableCell>
                     <TableCell>Monto</TableCell>
                     <TableCell>Departamento</TableCell>
-                    <TableCell>Cantidad de comentarios</TableCell>
+                    <TableCell>Cantidad de observaciones</TableCell>
                     <TableCell>Promedio de valoración</TableCell>
                     <TableCell align="center">Acciones</TableCell>
                   </TableRow>
@@ -230,14 +231,13 @@ const Results = ({ eprocurements }) => {
                         </TableCell>
                         <TableCell>
                             <Typography variant="h5">
-                              {/* {eprocurement.commentsNumber} */}
-                              10
+                              {eprocurement.totalCommentCount}
                             </Typography>
                         </TableCell>
                         <TableCell>
                             <Typography variant="h5">
-                              {/* {eprocurement.rateAverage} */}
-                              3.5 / 5
+                              {eprocurement.totalRatingAverage.toFixed(2)} 
+                              <Rating size="small" readOnly value={1} max={1}/>
                             </Typography>
                         </TableCell>
                         <TableCell align="center">

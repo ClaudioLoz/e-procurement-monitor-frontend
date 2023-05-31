@@ -57,7 +57,6 @@ const LoginJWT = () => {
             setStatus({ success: true });
             setSubmitting(false);
           }
-          console.log("hello?");
           navigate(`/contrataciones-seguimiento`);
         } catch (err) {
           console.error(err);

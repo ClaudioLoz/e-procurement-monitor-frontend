@@ -87,7 +87,7 @@ function RegisterJWT() {
             fullWidth
             margin="normal"
             helperText={touched.name && errors.name}
-            label="Nombre"
+            label="Nombre completo"
             name="name"
             onBlur={handleBlur}
             onChange={handleChange}

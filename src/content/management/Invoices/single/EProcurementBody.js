@@ -101,7 +101,7 @@ const EProcurementBody = ({ eProcurement }) => {
   }, [getComments]);
 
   const tabs = [
-    { value: 'reviews', label: "Comentarios" },
+    { value: 'reviews', label: `Observaciones (${comments.length})` },
     { value: 'additional_info', label: "Información adicional"}
   ];
   const handleTabsChange = (_event, value) => {

@@ -12,13 +12,16 @@ import {
   Button,
   Table,
   Tabs,
+  TextField,
   Tab,
   TableHead,
   TableRow,
   TableCell,
   TableBody,
   TableContainer,
-  styled
+  styled,
+  useTheme,
+
 } from '@mui/material';
 // import useAuth from 'src/hooks/useAuth';
 import SalesByCategory from '../../../dashboards/Commerce/SalesByCategory';
@@ -75,9 +78,17 @@ const map = {
 
 const EProcurementBody = ({ eProcurement }) => {
   // const { user } = useAuth();
-  const [currentTab, setCurrentTab] = useState('reviews');
+  const [currentTab, setCurrentTab] = useState('rating_justifications');
   const [comments, setComments] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [justifications, setJustifications] = useState([]);
+  const [starValue, setStarValue] = useState(2);
+  const [justificationValue, setJustificationValue] = useState(null);
+  const [suggestionValue, setSuggestionValue] = useState(null);
   const isMountedRef = useRefMounted();
+  const theme = useTheme();
+
+
   const getComments = useCallback(async () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/comments`,{
@@ -97,19 +108,98 @@ const EProcurementBody = ({ eProcurement }) => {
     }
   }, [isMountedRef]);
 
+
+
+  const getRatingJustifications = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/ratings`,{
+        params:{
+          eProcurementId: eProcurement.eprocurement.id,
+        }
+      });
+      // console.log(response.data)
+      if (isMountedRef.current) {
+        setJustifications(response.data.map( justification => {
+          // if(comment.image) comment.url = URL.createObjectURL(new Blob([comment.image]));
+          justification.date = new Date(justification.createdDate).toLocaleString( 'es-PE', options);
+          return justification;
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [isMountedRef]);
+
+
+
+  const getSuggestions = useCallback(async () => {
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_BACKEND_URL}/api/v1/suggestions`,{
+        params:{
+          eProcurementId: eProcurement.eprocurement.id,
+        }
+      });
+      if (isMountedRef.current) {
+        setSuggestions(response.data.map( suggestion => {
+          suggestion.date = new Date(suggestion.createdDate).toLocaleString( 'es-PE', options);
+          return suggestion;
+        }));
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }, [isMountedRef]);
+
+
   useEffect(() => {
-    getComments();
-  }, [getComments]);
+    if(currentTab === "reviews") getComments();
+    else if(currentTab === "rating_justifications") getRatingJustifications();
+    else if(currentTab === "suggestions") getSuggestions();
+  }, [getComments, getRatingJustifications, getSuggestions, currentTab]);
 
   const tabs = [
-    { value: 'rating_justifications', label: "Justificaciones"},
-    { value: 'suggestions', label: "Sugerencias"},
-    { value: 'reviews', label: "Comentarios" },
+    { value: 'rating_justifications', label: `Justificaciones (${justifications.length})`},
+    { value: 'suggestions', label: `Sugerencias (${suggestions.length})`},
+    { value: 'reviews', label: `Observaciones durante su ejecución (${comments.length})` },
     { value: 'additional_info', label: "Información adicional"},
   ];
   const handleTabsChange = (_event, value) => {
     setCurrentTab(value);
   };
+
+
+  const handleRatingJustificationChange = (event) => {
+    setJustificationValue(event.target.value)
+  };
+
+  const handleSuggestionChange = (event) => {
+    setSuggestionValue(event.target.value)
+  };
+
+  const handleStarChange = (event) => {
+    setStarValue(event.target.value)
+  };
+
+  const handleRatingJustificationSubmit = async() => {
+    const newRating = {
+      eprocurementId:eProcurement.eprocurement.id,
+      stars:starValue,
+      justification:justificationValue
+    };
+    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/ratings`, newRating);
+    response.data.date = new Date(response.data.createdDate).toLocaleString( 'es-PE', options);
+    setJustifications(prev => [...prev, response.data]);
+  }
+
+  const handleSuggestionSubmit = async() => {
+    const newSuggestion = {
+      eprocurementId: eProcurement.eprocurement.id, 
+      text:suggestionValue
+    };
+    const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/suggestions`, newSuggestion);
+    response.data.date = new Date(response.data.createdDate).toLocaleString( 'es-PE', options);
+    setSuggestions(prev => [...prev, response.data]);
+  }
 
   return (
     <Container maxWidth="lg">
@@ -229,16 +319,88 @@ const EProcurementBody = ({ eProcurement }) => {
             </Tabs>
           </TabsContainerWrapper>
           <Divider />
-          {currentTab === 'rating_justifications' && <ReviewsTab comments={comments} stringg="justificaciones de las calificaciones recibidas"/>}
-          {currentTab === 'suggestions' && <ReviewsTab comments={comments} stringg="sugerencias"/>}
-          {currentTab === 'reviews' && <ReviewsTab comments={comments}/>}
+          {currentTab === 'rating_justifications' && <ReviewsTab data={justifications} type="justifications"/>}
+          {currentTab === 'suggestions' && <ReviewsTab data={suggestions} type="suggestions"/>}
+          {currentTab === 'reviews' && <ReviewsTab data={comments} type="reviews"/>}
           {currentTab === 'additional_info' && <AdditionalInfoTab description={eProcurement.eprocurement.description}/>}
-          {/* <BottomBarContent setComments={setComments} eProcurementId={eProcurement.eprocurement.id}/> */}
-          {"Califica a la contratación"} <br/><Rating size="large" defaultValue={2} precision={1} />
-          <SalesByCategory />
-        </Card>
+
+          <Grid container>
+  {/* Left Side Content */}
+  <Grid item xs={12} sm={7}>
+    <Grid container direction="column">
+      <Grid item>
+          <Typography variant="h2">
+                          Calificación total actual:
+                          {` ${eProcurement.totalRatingAverage.toFixed(2)}`} 
+                          <Rating size="medium" readOnly value={1} max={1}/>
+        </Typography>
       </Grid>
-    </Container>
+      <br/>
+      <Grid item>
+      <Typography variant="h3">Califica a la contratación</Typography>
+      </Grid>
+      <Grid item>
+        <Rating size="large" defaultValue={3} precision={1} value={starValue} onChange={handleStarChange}/>
+      </Grid>
+      <Grid item>
+        <Typography variant="body1">Su retroalimentación podría ayudar a mejorar el futuro de las contrataciones públicas.</Typography>
+      </Grid>
+      <Grid item xs={12} sm={4} md={3} justifyContent="flex-end" textAlign={{ sm: 'left' }}>
+        <Box pr={3} sx={{ pt: `${theme.spacing(2)}`, pb: { xs: 1, md: 0 } }} alignSelf="center">
+          <b>Justificación:</b>
+        </Box>
+      </Grid>
+      <Grid item xs={12} sm={8} md={9}>
+        <TextField
+          multiline
+          placeholder="Escriba la justificación de su calificación"
+          name="rating_justification"
+          fullWidth
+          minRows={3}
+          maxRows={8}
+          onChange={handleRatingJustificationChange}
+          value={justificationValue}
+        />
+      </Grid>
+      <Grid item>
+        <Button variant="contained" color="primary" onClick={handleRatingJustificationSubmit}>
+          Enviar calificación
+        </Button>
+      </Grid>
+      <Grid item xs={12} sm={4} md={3} justifyContent="flex-end" textAlign={{ sm: 'left' }}>
+        <Box pr={3} sx={{ pt: `${theme.spacing(2)}`, pb: { xs: 1, md: 0 } }} alignSelf="center">
+          <b>Sugerencias:</b>
+        </Box>
+      </Grid>
+      <Grid item xs={12} sm={8} md={9}>
+        <TextField
+          multiline
+          placeholder="Escriba sugerencias"
+          name="suggestion"
+          fullWidth
+          minRows={3}
+          maxRows={8}
+          onChange={handleSuggestionChange}
+          value={suggestionValue}
+        />
+      </Grid>
+      <Grid item>
+        <Button variant="contained" color="primary" onClick={handleSuggestionSubmit}>
+          Enviar sugerencia
+        </Button>
+      </Grid>
+    </Grid>
+  </Grid>
+
+      {/* Right Side Content */}
+      <Grid item xs={12} sm={5}>
+        <SalesByCategory justifications={justifications} eProcurementId={eProcurement.eprocurement.id}/>
+      </Grid>
+    </Grid>
+
+    </Card>
+  </Grid>
+</Container>
   );
 };
 
