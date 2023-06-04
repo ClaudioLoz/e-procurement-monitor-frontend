@@ -185,7 +185,7 @@ const Results = ({ eprocurements }) => {
                     <TableCell>Monto</TableCell>
                     <TableCell>Departamento</TableCell>
                     <TableCell>Cantidad de observaciones</TableCell>
-                    <TableCell>Promedio de valoración</TableCell>
+                    <TableCell>Promedio de calificación</TableCell>
                     <TableCell align="center">Acciones</TableCell>
                   </TableRow>
                 </TableHead>

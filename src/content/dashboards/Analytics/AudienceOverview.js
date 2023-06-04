@@ -28,6 +28,7 @@ const typographySx = {
   whiteSpace: 'nowrap',
   mb: 2
 };
+
 const map = {
   WORK: {
     text: 'OBRA',
@@ -46,6 +47,7 @@ const map = {
     color: 'yellow'
   }
 };
+
 const months =  [
   'Enero',
   'Febrero',
@@ -59,9 +61,7 @@ const months =  [
   'Octubre',
   'Noviembre',
   'Diciembre'
-]
-
-
+];
 
 const metrics = [
   {
@@ -156,7 +156,7 @@ function AudienceOverview() {
       }
     },
     colors: [theme.colors.primary.main],
-    labels: averages.length>0? averages.map((a) => months[a.month-1]): months,
+    labels: averages.length > 0? averages.map((a) => months[a.month-1]): months,
     dataLabels: {
       enabled: false
     },
@@ -213,7 +213,9 @@ function AudienceOverview() {
       }
     },
     yaxis: {
-      tickAmount: 3,
+      min: 1, 
+      max: 5, 
+      tickAmount: 4, 
       axisBorder: {
         show: false
       },
@@ -227,15 +229,6 @@ function AudienceOverview() {
       }
     }
   };
-
-  // const data = {
-  //   users: 14.586,
-  //   newUsers: 12.847,
-  //   pageViews: 67.492,
-  //   avgSessionDuration: '00:05:21',
-  //   bounceRate: '65.37%',
-  //   sessions: 25.694
-  // };
 
   return (
     <Card>
@@ -290,9 +283,9 @@ function AudienceOverview() {
                           {` ${eProcurement.totalRatingAverage.toFixed(2)}`} 
                           <Rating size="medium" readOnly value={1} max={1}/>
                 </Typography>
-                    </Box>
-                  </Box>
-                </Card>
+              </Box>
+            </Box>
+          </Card>
         </Container>
         <CardHeader
         action={
@@ -381,7 +374,7 @@ function AudienceOverview() {
             series={[
               {
                 name: 'Promedio calificación',
-                data: averages.map(obj=>obj.average)
+                data: averages.map(obj=>Number(obj.average.toFixed(2)))
               }
             ]}
             type="line"

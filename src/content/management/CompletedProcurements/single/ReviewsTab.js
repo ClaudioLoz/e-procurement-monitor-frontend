@@ -12,9 +12,9 @@ import {
 
 function ReviewsTab({data, type,stringg}) {
 
-    if (type === 'comments') {
+    if (type === 'reviews') {
       stringg = 'comentarios';
-    } else if (type === "justifiactions") {
+    } else if (type === "justifications") {
       stringg="justificaciones de las calificaciones recibidas"
     } else if (type === "suggestions") {
       stringg="sugerencias"
@@ -80,7 +80,7 @@ function ReviewsTab({data, type,stringg}) {
                               ) : (
                                   (() => {
                                     let returnn;
-                                    if (type === "comments" || type === "suggestions") {
+                                    if (type === "reviews" || type === "suggestions") {
                                       returnn = 
                                         <Typography sx={{ mb: 3 }}>
                                           {d.text}

@@ -56,7 +56,7 @@ function ManagementInvoicesView() {
         spacing={4}
       >
         <Grid item xs={12}>
-          <EProcurementBody eProcurement={eProcurement} />
+          <EProcurementBody eProcurement={eProcurement} getEProcurement={getEProcurement}/>
         </Grid>
       </Grid>
     </>

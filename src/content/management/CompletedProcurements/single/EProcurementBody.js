@@ -76,7 +76,7 @@ const map = {
   }
 };
 
-const EProcurementBody = ({ eProcurement }) => {
+const EProcurementBody = ({ eProcurement, getEProcurement}) => {
   // const { user } = useAuth();
   const [currentTab, setCurrentTab] = useState('rating_justifications');
   const [comments, setComments] = useState([]);
@@ -159,8 +159,8 @@ const EProcurementBody = ({ eProcurement }) => {
 
   const tabs = [
     { value: 'rating_justifications', label: `Justificaciones (${justifications.length})`},
-    { value: 'suggestions', label: `Sugerencias (${suggestions.length})`},
-    { value: 'reviews', label: `Observaciones durante su ejecución (${comments.length})` },
+    { value: 'suggestions', label: `Sugerencias ${suggestions.length > 0? '(' + suggestions.length + ')' : '' }`},
+    { value: 'reviews', label: `Observaciones durante su ejecución ${comments.length > 0? '(' + comments.length + ')' : '' }` },
     { value: 'additional_info', label: "Información adicional"},
   ];
   const handleTabsChange = (_event, value) => {
@@ -189,6 +189,7 @@ const EProcurementBody = ({ eProcurement }) => {
     const response = await axios.post(`${process.env.REACT_APP_BACKEND_URL}/api/v1/ratings`, newRating);
     response.data.date = new Date(response.data.createdDate).toLocaleString( 'es-PE', options);
     setJustifications(prev => [...prev, response.data]);
+    getEProcurement();
   }
 
   const handleSuggestionSubmit = async() => {
